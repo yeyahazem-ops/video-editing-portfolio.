@@ -1,0 +1,266 @@
+<!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0;background:#000}canvas{display:block}</style></head><body>
+<canvas id="c" width="1920" height="1080"></canvas>
+<script>
+// One scene (Yasin with the ball, Uncle Fathy, his house with the window) drawn by six different renderers.
+const STYLE = new URLSearchParams(location.search).get('s') || 'crayon';
+const W = 1920, H = 1080, cv = document.getElementById('c'), ctx = cv.getContext('2d');
+let seed = 7; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+const R = (a, b) => a + (b - a) * rnd();
+
+// ---------- shapes as point lists ----------
+const ell = (cx, cy, rx, ry, n = 48, a0 = 0, a1 = Math.PI * 2) => { const p = []; for (let i = 0; i <= n; i++) { const a = a0 + (a1 - a0) * i / n; p.push([cx + Math.cos(a) * rx, cy + Math.sin(a) * ry]); } return p; };
+const rect = (x, y, w, h, r = 0) => { if (!r) return [[x, y], [x + w, y], [x + w, y + h], [x, y + h]]; const p = []; const c = [[x + w - r, y + r, -Math.PI / 2], [x + w - r, y + h - r, 0], [x + r, y + h - r, Math.PI / 2], [x + r, y + r, Math.PI]]; for (const [cx, cy, a] of c) for (let i = 0; i <= 6; i++) { const t = a + (Math.PI / 2) * i / 6; p.push([cx + Math.cos(t) * r, cy + Math.sin(t) * r]); } return p; };
+const capsule = (a, b, r) => { const ang = Math.atan2(b[1] - a[1], b[0] - a[0]); const p = []; for (let i = 0; i <= 12; i++) { const t = ang - Math.PI / 2 + Math.PI * i / 12; p.push([b[0] + Math.cos(t) * r, b[1] + Math.sin(t) * r]); } for (let i = 0; i <= 12; i++) { const t = ang + Math.PI / 2 + Math.PI * i / 12; p.push([a[0] + Math.cos(t) * r, a[1] + Math.sin(t) * r]); } return p; };
+const smileP = (cx, cy, r, th) => [...ell(cx, cy, r, r * 0.8, 16, 0.15 * Math.PI, 0.85 * Math.PI), ...ell(cx, cy, r - th, (r - th) * 0.6, 16, 0.85 * Math.PI, 0.15 * Math.PI)];
+
+// ---------- the scene graph ----------
+// item: { g: group, pts, col, kind: 'fill'|'detail'|'ring', w (ring width), role }
+function scene(o = {}) {
+  const items = [], add = (g, pts, col, kind = 'fill', extra = {}) => items.push({ g, pts, col, kind, ...extra });
+  const GY = o.ground ?? 900;
+  // the house
+  add('house', rect(1020, 170, 820, GY - 160), '#E9A178', 'fill', { role: 'wall' });
+  add('house', rect(1000, 150, 860, 40, 8), '#C9805B');
+  add('house', rect(1100, 470, 240, 230, 10), '#F4EBDD');
+  add('house', rect(1115, 485, 210, 200, 4), '#A9DCF2', 'fill', { role: 'glass' });
+  add('house', rect(1216, 485, 8, 200), '#6B4A33', 'detail'); add('house', rect(1115, 581, 210, 8), '#6B4A33', 'detail');
+  add('house', rect(1010, 470, 80, 230, 6), '#3E8E6A'); add('house', rect(1350, 470, 80, 230, 6), '#3E8E6A');
+  add('house', rect(1500, 430, 220, GY - 430, 8), '#8A5A3B');
+  add('house', rect(1520, 450, 180, 170, 6), '#7A4D31', 'detail'); add('house', rect(1520, 640, 180, 200, 6), '#7A4D31', 'detail');
+  add('house', ell(1680, 660, 12, 12, 16), '#F2C94C', 'detail');
+  add('house', rect(1120, 260, 160, 140, 8), '#A9DCF2', 'fill', { role: 'glass' }); add('house', rect(1560, 260, 160, 140, 8), '#A9DCF2', 'fill', { role: 'glass' });
+  // Uncle Fathy
+  const ux = 1330, uy = GY;
+  add('uncle', capsule([ux - 70, uy - 360], [ux - 170, uy - 470], 26), '#8FA9C4', 'fill', { role: 'arm' }); // waving arm
+  add('uncle', ell(ux - 180, uy - 490, 26, 26), '#B9835A', 'fill', { role: 'hand' });
+  add('uncle', [[ux - 90, uy - 400], [ux + 90, uy - 400], [ux + 130, uy - 10], [ux - 130, uy - 10]], '#8FA9C4', 'fill', { role: 'robe' });
+  add('uncle', capsule([ux + 85, uy - 380], [ux + 110, uy - 220], 26), '#8FA9C4', 'fill', { role: 'arm' });
+  add('uncle', ell(ux + 112, uy - 200, 26, 26), '#B9835A', 'fill', { role: 'hand' });
+  add('uncle', ell(ux - 55, uy - 6, 50, 22), '#5A3B26'); add('uncle', ell(ux + 55, uy - 6, 50, 22), '#5A3B26');
+  add('uncle', ell(ux, uy - 500, 105, 115), '#B9835A', 'fill', { role: 'head' });
+  add('uncle', ell(ux - 100, uy - 500, 28, 40), '#E8E6E0'); add('uncle', ell(ux + 100, uy - 500, 28, 40), '#E8E6E0');
+  for (const s of [-1, 1]) { add('uncle', ell(ux + s * 40, uy - 520, 16, 18), '#FFFFFF', 'detail', { role: 'eyeW' }); add('uncle', ell(ux + s * 40, uy - 518, 8, 10), '#2A1C14', 'detail', { role: 'pupil' }); add('uncle', ell(ux + s * 40, uy - 520, 30, 28), '#3A2A22', 'ring', { w: 6 }); }
+  add('uncle', ell(ux, uy - 465, 44, 16), '#E8E6E0'); add('uncle', smileP(ux, uy - 440, 32, 9), '#7A2E25', 'detail', { role: 'mouth' });
+  // Yasin
+  const kx = 640, ky = GY;
+  add('kid', capsule([kx - 34, ky - 200], [kx - 40, ky - 40], 22), '#C68B59', 'fill', { role: 'leg' }); add('kid', capsule([kx + 34, ky - 200], [kx + 40, ky - 40], 22), '#C68B59', 'fill', { role: 'leg' });
+  add('kid', ell(kx - 52, ky - 22, 44, 24), '#F4F1EA', 'fill', { role: 'shoe' }); add('kid', ell(kx + 52, ky - 22, 44, 24), '#F4F1EA', 'fill', { role: 'shoe' });
+  add('kid', rect(kx - 80, ky - 250, 160, 90, 20), '#2B4C7E');
+  add('kid', capsule([kx - 80, ky - 380], [kx - 140, ky - 250], 20), '#C68B59', 'fill', { role: 'arm' });
+  add('kid', ell(kx - 145, ky - 238, 24, 24), '#C68B59', 'fill', { role: 'hand' });
+  add('kid', capsule([kx + 80, ky - 380], [kx + 170, ky - 480], 20), '#C68B59', 'fill', { role: 'arm' });
+  add('kid', ell(kx + 178, ky - 492, 24, 24), '#C68B59', 'fill', { role: 'hand' });
+  add('kid', rect(kx - 95, ky - 420, 190, 190, 40), '#E9483B', 'fill', { role: 'shirt' });
+  add('kid', ell(kx, ky - 540, 120, 118), '#C68B59', 'fill', { role: 'head' });
+  add('kid', [...ell(kx, ky - 560, 124, 112, 30, Math.PI * 1.02, Math.PI * 1.98), [kx + 90, ky - 590], [kx - 90, ky - 590]], '#2A1C14', 'fill', { role: 'hair' });
+  for (const s of [-1, 1]) { add('kid', ell(kx + s * 45, ky - 545, 24, 28), '#FFFFFF', 'detail', { role: 'eyeW' }); add('kid', ell(kx + s * 45 + 3, ky - 540, 12, 15), '#2A1C14', 'detail', { role: 'pupil' }); add('kid', ell(kx + s * 75, ky - 495, 18, 11), '#F28C7A', 'detail', { role: 'cheek' }); }
+  add('kid', smileP(kx, ky - 495, 44, 12), '#7A2E25', 'detail', { role: 'mouth' });
+  // the ball
+  add('ball', ell(860, ky - 40, 42, 42), '#FBFBF6', 'fill', { role: 'ball' });
+  add('ball', ell(860, ky - 40, 13, 13, 5), '#222222', 'detail'); add('ball', ell(836, ky - 64, 9, 9, 5), '#222222', 'detail'); add('ball', ell(886, ky - 62, 9, 9, 5), '#222222', 'detail'); add('ball', ell(838, ky - 14, 9, 9, 5), '#222222', 'detail'); add('ball', ell(884, ky - 16, 9, 9, 5), '#222222', 'detail');
+  return items;
+}
+const pathOf = (c, pts, j = 0) => { c.beginPath(); pts.forEach(([x, y], i) => { x += j ? R(-j, j) : 0; y += j ? R(-j, j) : 0; i ? c.lineTo(x, y) : c.moveTo(x, y); }); c.closePath(); };
+const bbox = (pts) => { let a = 1e9, b = 1e9, c = -1e9, d = -1e9; for (const [x, y] of pts) { a = Math.min(a, x); b = Math.min(b, y); c = Math.max(c, x); d = Math.max(d, y); } return [a, b, c, d]; };
+function grain(amount, mono = true) { const id = ctx.getImageData(0, 0, W, H), d = id.data; for (let i = 0; i < d.length; i += 4) { const n = (rnd() - 0.5) * amount; d[i] += n; d[i + 1] += n; d[i + 2] += n; } ctx.putImageData(id, 0, 0); }
+const shade = (hex, k) => { const n = parseInt(hex.slice(1), 16); const f = (v) => Math.max(0, Math.min(255, Math.round(v * k))); return `rgb(${f(n >> 16)},${f((n >> 8) & 255)},${f(n & 255)})`; };
+function title(txt, col, font, y = 1030, stroke) { ctx.save(); ctx.font = font; ctx.textAlign = 'center'; if (stroke) { ctx.lineWidth = 10; ctx.strokeStyle = stroke; ctx.strokeText(txt, W / 2, y); } ctx.fillStyle = col; ctx.fillText(txt, W / 2, y); ctx.restore(); }
+
+// ================= 7. CRAYON PICTURE BOOK =================
+function crayon() {
+  ctx.fillStyle = '#f4efe3'; ctx.fillRect(0, 0, W, H);
+  const zig = (pts, col, gap = 9, ang = 0.9, alpha = 0.85, wob = 3) => {
+    const [x0, y0, x1, y1] = bbox(pts);
+    ctx.save(); pathOf(ctx, pts.map(([x, y]) => [x + R(-4, 4), y + R(-4, 4)])); ctx.clip();
+    ctx.strokeStyle = col; ctx.globalAlpha = alpha; ctx.lineCap = 'round';
+    const L = Math.hypot(x1 - x0, y1 - y0) + 40, cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
+    ctx.translate(cx, cy); ctx.rotate(ang);
+    ctx.beginPath(); let up = true;
+    for (let k = -L / 2; k < L / 2; k += gap) { ctx.lineWidth = R(5, 9); const y = up ? -L / 2 : L / 2; ctx.lineTo(k + R(-wob, wob), y); up = !up; }
+    ctx.stroke(); ctx.restore();
+  };
+  const crayonLine = (pts, col, w = 5, close = true) => {
+    for (let pass = 0; pass < 2; pass++) { ctx.save(); ctx.strokeStyle = col; ctx.globalAlpha = pass ? 0.45 : 0.9; ctx.lineWidth = w * (pass ? 0.5 : 1); ctx.lineCap = ctx.lineJoin = 'round'; ctx.beginPath(); const P = close ? [...pts, pts[0]] : pts; P.forEach(([x, y], i) => { x += R(-1.8, 1.8) + pass * 2; y += R(-1.8, 1.8); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }); ctx.stroke(); ctx.restore(); }
+  };
+  // sky scribbles, a sun with rays, grass
+  zig(rect(0, 0, W, 900), '#9ccfee', 14, 0.25, 0.55, 6);
+  zig(ell(260, 170, 90, 90), '#f6c445', 8, 0.6, 0.95); crayonLine(ell(260, 170, 90, 90), '#e8962f', 6);
+  for (let i = 0; i < 12; i++) { const a = i * Math.PI / 6; crayonLine([[260 + Math.cos(a) * 115, 170 + Math.sin(a) * 115], [260 + Math.cos(a) * 165, 170 + Math.sin(a) * 165]], '#e8962f', 7, false); }
+  zig(rect(0, 880, W, 200), '#7cc06a', 10, -0.3, 0.85); crayonLine([[0, 885], [W, 892]], '#4e9a43', 7, false);
+  for (const it of scene()) {
+    if (it.kind === 'ring') { crayonLine(it.pts, it.col, 5); continue; }
+    if (it.kind === 'detail') { zig(it.pts, it.col, 5, 0.4, 0.95, 1); crayonLine(it.pts, shade(it.col, 0.6), 3); continue; }
+    zig(it.pts, it.col, it.role === 'wall' ? 12 : 8, it.g === 'kid' ? 1.1 : 0.7);
+    crayonLine(it.pts, '#3b2a24', it.g === 'house' ? 4 : 6);
+  }
+  ctx.font = 'bold 64px "Comic Sans MS", cursive'; ctx.fillStyle = '#d0473a'; ctx.save(); ctx.translate(560, 1010); ctx.rotate(-0.03); ctx.fillText('Yasin and the Window', 0, 0); ctx.restore();
+  grain(26);
+}
+
+// ================= 8. PAPER POP-UP BOOK =================
+function popup() {
+  // a real desk, softly out of focus, and the open book
+  const g = ctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, '#5a3a22'); g.addColorStop(1, '#3b2414'); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  ctx.save(); ctx.filter = 'blur(10px)'; for (let i = 0; i < 40; i++) { ctx.strokeStyle = `rgba(${120 + R(0, 40)},${80 + R(0, 30)},${40},0.35)`; ctx.lineWidth = R(4, 14); ctx.beginPath(); ctx.moveTo(0, R(0, H)); ctx.bezierCurveTo(W / 3, R(0, H), W * 2 / 3, R(0, H), W, R(0, H)); ctx.stroke(); } ctx.restore();
+  // book pages
+  ctx.save(); ctx.shadowColor = 'rgba(0,0,0,0.5)'; ctx.shadowBlur = 40; ctx.shadowOffsetY = 20;
+  ctx.fillStyle = '#f3ead7'; ctx.beginPath(); ctx.moveTo(60, 760); ctx.quadraticCurveTo(W / 2, 700, W / 2, 740); ctx.quadraticCurveTo(W / 2, 700, W - 60, 760); ctx.lineTo(W - 20, 1080); ctx.lineTo(20, 1080); ctx.fill(); ctx.restore();
+  ctx.strokeStyle = 'rgba(120,90,60,0.4)'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(W / 2, 740); ctx.lineTo(W / 2, 1080); ctx.stroke();
+  // each group is a paper cut-out standing up: white border, grey card edge, real shadow
+  const groups = {}; for (const it of scene({ ground: 880 })) (groups[it.g] = groups[it.g] || []).push(it);
+  const sky = [{ pts: ell(330, 220, 110, 110), col: '#FFD45A', kind: 'fill' }];
+  const cloud = [{ pts: [...ell(700, 230, 90, 60, 20), ...ell(800, 200, 100, 75, 20), ...ell(900, 235, 80, 55, 20)], col: '#ffffff', kind: 'fill' }];
+  for (const [name, items] of [['sun', sky], ['cloud', cloud], ['house', groups.house], ['uncle', groups.uncle], ['kid', groups.kid], ['ball', groups.ball]]) {
+    const off = document.createElement('canvas'); off.width = W; off.height = H; const c = off.getContext('2d');
+    for (const it of items) {
+      c.save(); pathOf(c, it.pts, 0.6);
+      if (it.kind === 'ring') { c.strokeStyle = it.col; c.lineWidth = it.w; c.stroke(); c.restore(); continue; }
+      c.fillStyle = it.col; c.fill();
+      if (it.kind === 'fill') { // one hard crescent of shade
+        c.clip(); const [x0, y0, x1, y1] = bbox(it.pts); c.fillStyle = shade(it.col, 0.82); c.beginPath(); c.ellipse(x1, (y0 + y1) / 2, (x1 - x0) * 0.35, (y1 - y0) * 0.7, 0, 0, 7); c.fill();
+      }
+      c.restore(); c.save(); pathOf(c, it.pts, 0.6); c.strokeStyle = '#3d2618'; c.lineWidth = it.kind === 'detail' ? 3 : 6; c.lineJoin = 'round'; c.stroke(); c.restore();
+    }
+    // silhouette helpers
+    const sil = (color) => { const s = document.createElement('canvas'); s.width = W; s.height = H; const sc = s.getContext('2d'); sc.drawImage(off, 0, 0); sc.globalCompositeOperation = 'source-in'; sc.fillStyle = color; sc.fillRect(0, 0, W, H); return s; };
+    const white = sil('#fbf8f0'), grey = sil('#a49a8c'), dark = sil('rgba(20,10,0,0.55)');
+    ctx.save(); ctx.filter = 'blur(14px)'; ctx.drawImage(dark, 22, 26); ctx.restore();
+    for (let a = 0; a < 24; a++) { const t = a / 24 * Math.PI * 2; ctx.drawImage(grey, Math.cos(t) * 14, Math.sin(t) * 14 + 6); }
+    for (let a = 0; a < 24; a++) { const t = a / 24 * Math.PI * 2; ctx.drawImage(white, Math.cos(t) * 14, Math.sin(t) * 14); }
+    ctx.drawImage(off, 0, 0);
+  }
+  // the fold tabs at the bottom of the cut-outs
+  ctx.fillStyle = 'rgba(0,0,0,0.12)'; ctx.fillRect(560, 880, 380, 14); ctx.fillRect(1180, 880, 300, 14);
+  ctx.save(); ctx.font = '700 74px "Trebuchet MS", sans-serif'; ctx.textAlign = 'center'; ctx.fillStyle = '#C0392B'; ctx.lineWidth = 12; ctx.strokeStyle = '#fbf8f0'; ctx.strokeText('Yasin and the Window', W / 2, 1010); ctx.fillText('Yasin and the Window', W / 2, 1010); ctx.restore();
+  grain(10);
+}
+
+// ================= 9. 1930s RUBBER HOSE =================
+function rubberhose() {
+  const gray = (hex) => { const n = parseInt(hex.slice(1), 16); const l = Math.round(0.3 * (n >> 16) + 0.55 * ((n >> 8) & 255) + 0.15 * (n & 255)); return l; };
+  // background: flat wash + blotches + wallpaper pattern on the house
+  ctx.fillStyle = '#cfcac0'; ctx.fillRect(0, 0, W, H);
+  for (let i = 0; i < 30; i++) { ctx.fillStyle = `rgba(0,0,0,${R(0.02, 0.05)})`; ctx.beginPath(); ctx.ellipse(R(0, W), R(0, H), R(100, 300), R(60, 200), 0, 0, 7); ctx.fill(); }
+  ctx.fillStyle = '#9d988f'; ctx.fillRect(0, 890, W, 190);
+  for (let x = -40; x < W; x += 120) { ctx.strokeStyle = '#6f6a62'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(x, 890); ctx.lineTo(x - 80, 1080); ctx.stroke(); }
+  const items = scene();
+  for (const it of items) {
+    let col = it.col, g = gray(col);
+    let v = it.role === 'pupil' ? 10 : it.role === 'eyeW' || it.role === 'ball' || it.role === 'shoe' ? 250 : it.role === 'hand' ? 252 : it.role === 'shirt' ? 40 : it.role === 'head' ? 236 : it.role === 'hair' ? 15 : Math.round(g * 0.95);
+    if (it.g === 'house' && it.role === 'wall') v = 196;
+    ctx.save(); pathOf(ctx, it.pts, 1.1);
+    if (it.kind === 'ring') { ctx.strokeStyle = '#111'; ctx.lineWidth = 7; ctx.stroke(); ctx.restore(); continue; }
+    ctx.fillStyle = `rgb(${v},${v},${v * 0.97})`; ctx.fill();
+    if (it.role === 'wall') { ctx.clip(); ctx.fillStyle = 'rgba(0,0,0,0.12)'; for (let y = 180; y < 900; y += 50) for (let x = 1030 + (y / 50 % 2) * 25; x < 1840; x += 50) { ctx.beginPath(); ctx.arc(x, y, 6, 0, 7); ctx.fill(); } }
+    if (it.kind === 'fill' && it.g !== 'house') { ctx.clip(); const [x0, y0, x1, y1] = bbox(it.pts); ctx.fillStyle = 'rgba(0,0,0,0.18)'; ctx.fillRect(x0 + (x1 - x0) * 0.68, y0, x1, y1 - y0); }
+    ctx.restore();
+    ctx.save(); pathOf(ctx, it.pts, 1.1); ctx.strokeStyle = '#111'; ctx.lineWidth = it.kind === 'detail' ? 3 : 7; ctx.lineJoin = 'round'; ctx.stroke(); ctx.restore();
+  }
+  // pie eyes (a wedge cut out of each black pupil) and glove cuffs
+  for (const it of items.filter((q) => q.role === 'pupil')) { const [x0, y0, x1, y1] = bbox(it.pts); const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2; ctx.fillStyle = '#111'; ctx.beginPath(); ctx.ellipse(cx, cy, (x1 - x0) * 1.15, (y1 - y0) * 1.1, 0, 0, 7); ctx.fill(); ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.moveTo(cx, cy); ctx.arc(cx, cy, (y1 - y0), -1.2, -0.5); ctx.fill(); }
+  for (const it of items.filter((q) => q.role === 'hand')) { const [x0, y0, x1, y1] = bbox(it.pts); const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2; for (const k of [-1, 0, 1]) { ctx.fillStyle = '#fff'; ctx.strokeStyle = '#111'; ctx.lineWidth = 5; ctx.beginPath(); ctx.ellipse(cx + k * 14, cy - 22, 10, 18, k * 0.2, 0, 7); ctx.fill(); ctx.stroke(); } }
+  // film: vignette, grain, scratches, a flicker
+  const vg = ctx.createRadialGradient(W / 2, H / 2, 300, W / 2, H / 2, 1150); vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(0,0,0,0.65)'); ctx.fillStyle = vg; ctx.fillRect(0, 0, W, H);
+  for (let i = 0; i < 6; i++) { ctx.strokeStyle = `rgba(255,255,255,${R(0.2, 0.5)})`; ctx.lineWidth = 1.5; const x = R(0, W); ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x + R(-10, 10), H); ctx.stroke(); }
+  ctx.save(); ctx.font = 'italic 900 80px Georgia, serif'; ctx.textAlign = 'center'; ctx.fillStyle = '#f2efe6'; ctx.strokeStyle = '#111'; ctx.lineWidth = 10; ctx.strokeText('"YASIN and the WINDOW"', W / 2, 1010); ctx.fillText('"YASIN and the WINDOW"', W / 2, 1010); ctx.restore();
+  grain(40); ctx.fillStyle = 'rgba(80,60,30,0.10)'; ctx.fillRect(0, 0, W, H);
+}
+
+// ================= 10. MID-CENTURY CARTOON =================
+function midcentury() {
+  const PAL = { '#E9A178': '#E3B26A', '#C9805B': '#C4553F', '#F4EBDD': '#F2E6CC', '#A9DCF2': '#7FB3B0', '#3E8E6A': '#4E7E6B', '#8A5A3B': '#5E4B6E', '#E9483B': '#D8513B', '#2B4C7E': '#2F4858', '#8FA9C4': '#6E95A8' };
+  // abstract colour planes instead of a real street
+  ctx.fillStyle = '#EFE3C8'; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = '#E8A9A0'; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(820, 0); ctx.lineTo(620, 900); ctx.lineTo(0, 900); ctx.fill();
+  ctx.fillStyle = '#9BB8A6'; ctx.beginPath(); ctx.ellipse(380, 260, 170, 170, 0, 0, 7); ctx.fill();
+  ctx.fillStyle = '#3D3B3A'; ctx.fillRect(0, 900, W, 180);
+  ctx.strokeStyle = '#EFE3C8'; ctx.lineWidth = 6; for (let x = 980; x < W; x += 160) { ctx.beginPath(); ctx.moveTo(x, 985); ctx.lineTo(x + 80, 985); ctx.stroke(); }
+  // starbursts
+  for (const [x, y] of [[180, 620], [880, 160]]) { ctx.strokeStyle = '#2B2622'; ctx.lineWidth = 4; for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4; ctx.beginPath(); ctx.moveTo(x + Math.cos(a) * 12, y + Math.sin(a) * 12); ctx.lineTo(x + Math.cos(a) * 40, y + Math.sin(a) * 40); ctx.stroke(); } }
+  for (const it of scene()) {
+    const col = PAL[it.col] || it.col;
+    // fill printed a few px off its line
+    ctx.save(); ctx.translate(R(5, 9), R(4, 8)); pathOf(ctx, it.pts); if (it.kind === 'ring') { ctx.restore(); } else { ctx.fillStyle = col; ctx.fill(); ctx.restore(); }
+    // thin breathing ink line with breaks
+    const P = [...it.pts, it.pts[0]];
+    ctx.save(); ctx.strokeStyle = '#2B2622'; ctx.lineCap = 'round';
+    for (let i = 1; i < P.length; i++) { if (rnd() < 0.16) continue; ctx.lineWidth = it.kind === 'ring' ? 5 : R(2.5, 5); ctx.beginPath(); ctx.moveTo(P[i - 1][0], P[i - 1][1]); ctx.lineTo(P[i][0], P[i][1]); ctx.stroke(); }
+    ctx.restore();
+  }
+  // dry-brush texture
+  for (let i = 0; i < 400; i++) { ctx.fillStyle = `rgba(255,250,235,${R(0.05, 0.15)})`; ctx.fillRect(R(0, W), R(0, H), R(10, 60), 2); }
+  ctx.save(); ctx.font = '700 70px "Futura", "Century Gothic", sans-serif'; ctx.fillStyle = '#EFE3C8'; ctx.textAlign = 'left'; ctx.fillText('YASIN', 90, 1030); ctx.fillStyle = '#D8513B'; ctx.font = 'italic 54px Georgia, serif'; ctx.fillText('and the Window', 360, 1030); ctx.restore();
+  grain(14);
+}
+
+// ================= 16. SHADOW PUPPET =================
+function puppet() {
+  // the lamp-lit cloth screen
+  const g = ctx.createRadialGradient(W * 0.5, H * 0.42, 60, W * 0.5, H * 0.5, 1100); g.addColorStop(0, '#fff3cf'); g.addColorStop(0.45, '#f2c879'); g.addColorStop(1, '#5a2a0e'); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  for (let i = 0; i < 2000; i++) { ctx.fillStyle = `rgba(120,70,20,${R(0.02, 0.06)})`; ctx.fillRect(R(0, W), R(0, H), 1, R(4, 20)); }
+  const DYE = { '#E9A178': '#c9601c', '#C9805B': '#8a2f12', '#E9483B': '#c21f1f', '#2B4C7E': '#1f4f8a', '#8FA9C4': '#2f7a5c', '#C68B59': '#d99a3c', '#B9835A': '#d99a3c', '#3E8E6A': '#1f6b44', '#8A5A3B': '#6e2a10', '#F4EBDD': '#e3b45a', '#A9DCF2': '#f6e7a8', '#FBFBF6': '#f6e7a8', '#E8E6E0': '#f4e0b0', '#F4F1EA': '#e0b050', '#5A3B26': '#3a1a08' };
+  for (const grp of ['house', 'uncle', 'kid', 'ball']) {
+    const off = document.createElement('canvas'); off.width = W; off.height = H; const c = off.getContext('2d');
+    for (const it of scene({ ground: 930 }).filter((q) => q.g === grp)) {
+      if (it.role === 'cheek') continue;
+      c.save(); pathOf(c, it.pts);
+      if (it.kind === 'ring') { c.strokeStyle = '#1a0c04'; c.lineWidth = it.w; c.stroke(); c.restore(); continue; }
+      c.fillStyle = it.role === 'pupil' || it.role === 'hair' ? '#1a0c04' : (DYE[it.col] || it.col); c.globalAlpha = grp === 'house' ? 0.62 : 0.85; c.fill(); c.globalAlpha = 1;
+      c.strokeStyle = '#1a0c04'; c.lineWidth = 4; c.stroke(); c.restore();
+      // carving: rows of little holes in the big pieces
+      if (it.kind === 'fill' && ['shirt', 'robe', 'wall'].includes(it.role)) {
+        const [x0, y0, x1, y1] = bbox(it.pts); c.save(); pathOf(c, it.pts); c.clip(); c.globalCompositeOperation = 'destination-out';
+        for (let y = y0 + 20; y < y1 - 10; y += 34) for (let x = x0 + 18; x < x1 - 10; x += 34) { c.beginPath(); if ((x + y) % 3 < 1.5) c.arc(x, y, 7, 0, 7); else c.ellipse(x, y, 10, 4, 0.7, 0, 7); c.fill(); }
+        c.restore();
+      }
+    }
+    // the puppet rods
+    if (grp === 'kid' || grp === 'uncle') { c.strokeStyle = '#2a1408'; c.lineWidth = 6; for (const [x, y] of grp === 'kid' ? [[640, 700], [818, 408]] : [[1330, 640], [1150, 440]]) { c.beginPath(); c.moveTo(x, y); c.lineTo(x + (grp === 'kid' ? -60 : 80), 1100); c.stroke(); } }
+    ctx.save(); ctx.globalCompositeOperation = 'multiply'; ctx.filter = 'blur(1.2px)'; ctx.drawImage(off, 0, 0); ctx.restore();
+  }
+  // lamp flicker glow and the storyteller's placard
+  ctx.save(); ctx.globalCompositeOperation = 'screen'; const lg = ctx.createRadialGradient(W / 2, 300, 10, W / 2, 300, 600); lg.addColorStop(0, 'rgba(255,240,200,0.35)'); lg.addColorStop(1, 'rgba(255,240,200,0)'); ctx.fillStyle = lg; ctx.fillRect(0, 0, W, H); ctx.restore();
+  ctx.fillStyle = '#2a120a'; ctx.fillRect(W / 2 - 420, 965, 840, 84); ctx.strokeStyle = '#c99b45'; ctx.lineWidth = 3; ctx.strokeRect(W / 2 - 410, 973, 820, 68);
+  ctx.save(); ctx.font = '600 50px Georgia, serif'; ctx.fillStyle = '#f2e3c0'; ctx.textAlign = 'center'; ctx.fillText('Yasin and the Window', W / 2, 1022); ctx.restore();
+}
+
+// ================= 17. MEMPHIS DIORAMA =================
+function memphis() {
+  const PAL = { '#E9A178': '#FF9F8A', '#C9805B': '#FF5C8A', '#F4EBDD': '#FFF4D6', '#A9DCF2': '#7FD6F0', '#3E8E6A': '#2EC4A6', '#8A5A3B': '#5B4BD6', '#E9483B': '#FF4B3E', '#2B4C7E': '#2D5BFF', '#8FA9C4': '#8FB8FF' };
+  ctx.fillStyle = '#FBF6EC'; ctx.fillRect(0, 0, W, H);
+  // the organic frame the world grows inside
+  const frame = []; for (let i = 0; i < 80; i++) { const a = i / 80 * Math.PI * 2; frame.push([W / 2 + Math.cos(a) * (860 + Math.sin(a * 5) * 18), 470 + Math.sin(a) * (420 + Math.cos(a * 4) * 14)]); }
+  ctx.save(); pathOf(ctx, frame); ctx.clip();
+  ctx.fillStyle = '#FFE066'; ctx.fillRect(0, 0, W, H);
+  // confetti marks: squiggles, triangles, dots
+  for (let i = 0; i < 26; i++) { const x = R(150, W - 150), y = R(80, 420); ctx.fillStyle = ['#FF5C8A', '#2D5BFF', '#2EC4A6', '#25214A'][i % 4]; if (i % 3 === 0) { ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + 26, y + 6); ctx.lineTo(x + 8, y + 28); ctx.fill(); } else if (i % 3 === 1) { ctx.beginPath(); ctx.arc(x, y, 9, 0, 7); ctx.fill(); } else { ctx.strokeStyle = ctx.fillStyle; ctx.lineWidth = 6; ctx.beginPath(); for (let k = 0; k < 5; k++) ctx.lineTo(x + k * 14, y + (k % 2) * 14); ctx.stroke(); } }
+  // terrazzo ground
+  ctx.fillStyle = '#F6D4E2'; ctx.fillRect(0, 880, W, 300); for (let i = 0; i < 300; i++) { ctx.fillStyle = ['#2D5BFF', '#FF5C8A', '#25214A', '#2EC4A6'][i % 4]; ctx.beginPath(); ctx.arc(R(0, W), R(890, 960), R(2, 5), 0, 7); ctx.fill(); }
+  const items = scene({ ground: 880 });
+  // hard purple shadows first
+  ctx.save(); ctx.fillStyle = 'rgba(107,79,160,0.55)'; for (const it of items) if (it.kind === 'fill' && it.g !== 'house') { pathOf(ctx, it.pts.map(([x, y]) => [x + 26, y + 14])); ctx.fill(); } ctx.restore();
+  ctx.save(); ctx.fillStyle = 'rgba(107,79,160,0.4)'; pathOf(ctx, rect(1046, 184, 820, 700)); ctx.fill(); ctx.restore();
+  for (const it of items) {
+    const col = PAL[it.col] || it.col;
+    ctx.save(); pathOf(ctx, it.pts);
+    if (it.kind !== 'ring') { ctx.fillStyle = col; ctx.fill(); }
+    // little patterns on big surfaces
+    if (it.role === 'wall') { ctx.clip(); ctx.fillStyle = '#FF5C8A'; for (let y = 200; y < 900; y += 40) for (let x = 1040 + (y / 40 % 2) * 20; x < 1840; x += 40) { ctx.beginPath(); ctx.arc(x, y, 5, 0, 7); ctx.fill(); } }
+    if (it.role === 'shirt') { ctx.clip(); ctx.strokeStyle = '#FFE066'; ctx.lineWidth = 6; for (let y = 500; y < 700; y += 26) { ctx.beginPath(); for (let k = 0; k < 14; k++) ctx.lineTo(540 + k * 16, y + (k % 2) * 10); ctx.stroke(); } }
+    if (it.role === 'robe') { ctx.clip(); ctx.fillStyle = '#2D5BFF'; for (let y = 520; y < 900; y += 30) for (let x = 1190; x < 1470; x += 30) ctx.fillRect(x + (y / 30 % 2) * 15, y, 6, 6); }
+    ctx.restore();
+    ctx.save(); pathOf(ctx, it.pts); ctx.strokeStyle = '#25214A'; ctx.lineWidth = it.kind === 'ring' ? it.w : it.kind === 'detail' ? 2.5 : 4; ctx.lineJoin = 'round'; ctx.stroke(); ctx.restore();
+  }
+  ctx.restore();
+  ctx.save(); ctx.strokeStyle = '#25214A'; ctx.lineWidth = 5; pathOf(ctx, frame); ctx.stroke(); ctx.restore();
+  // three marks and three lines of type under the frame
+  ctx.fillStyle = '#FFE066'; ctx.beginPath(); ctx.arc(680, 975, 16, 0, 7); ctx.fill();
+  ctx.fillStyle = '#FF5C8A'; ctx.beginPath(); ctx.moveTo(720, 990); ctx.lineTo(752, 990); ctx.lineTo(736, 960); ctx.fill();
+  ctx.strokeStyle = '#2D5BFF'; ctx.lineWidth = 5; ctx.beginPath(); for (let k = 0; k < 6; k++) ctx.lineTo(770 + k * 10, 965 + (k % 2) * 18); ctx.stroke();
+  ctx.save(); ctx.fillStyle = '#25214A'; ctx.font = '800 46px "Helvetica Neue", Arial, sans-serif'; ctx.fillText('Yasin and the Window', 850, 990); ctx.font = '28px "Helvetica Neue", Arial, sans-serif'; ctx.fillStyle = '#5B4BD6'; ctx.fillText('Episode 1 · a story about telling the truth', 850, 1036); ctx.restore();
+  grain(8);
+}
+
+({ crayon, popup, rubberhose, midcentury, puppet, memphis })[STYLE]();
+window.DONE = true;
+</script></body></html>
