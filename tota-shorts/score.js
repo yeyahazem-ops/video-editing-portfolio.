@@ -1,4 +1,4 @@
-// TOTA TALES shorts: the shared timeline. The episode's script (ep-script.js), its measured voice timing
+// BUBBLY TALES shorts: the shared timeline. The episode's script (ep-script.js), its measured voice timing
 // (ep-timing.js) and its hits (ep-beats.js) are copied in by `node tools/use.js epNN`.
 (function () {
   const node = typeof require !== 'undefined';
@@ -16,7 +16,7 @@
   const prog = ['F', 'C', 'Dm', 'Bb'];
   const { chords, chordAt } = makeChords(clock, { F: { notes: ['F4', 'A4', 'C5'], bass: 'F2' }, C: { notes: ['E4', 'G4', 'C5'], bass: 'C2' }, Dm: { notes: ['D4', 'F4', 'A4'], bass: 'D2' }, Bb: { notes: ['D4', 'F4', 'Bb4'], bass: 'Bb1' } },
     Array.from({ length: bars }, (_, b) => [b, 0, 4, prog[b % 4]]));
-  const TITLE = 'TOTA TALES', END_TITLE = 'TOTA, TOTA!';
+  const TITLE = 'BUBBLY TALES', END_TITLE = 'THE END!';
   const drops = (str, t0) => { const out = []; let k = 0; for (const ch of str) { out.push(ch === ' ' ? null : t0 + k * BEAT / 4); if (ch !== ' ') k++; } return out; };
   const letters = drops(TITLE, L.title.t + 0.05), endLetters = drops(END_TITLE, L.tota.t + 0.05);
   const md = L.moral.end - L.moral.t, moralStamps = [0, 0.25, 0.5, 0.78].map((k) => L.moral.t + k * md);

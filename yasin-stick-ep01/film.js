@@ -200,21 +200,53 @@
     return { wx, wy, ww, wh, dx, dy, dw, dh };
   }
 
+  // ---------- the brand: the logo's look (sticker letters, blue sky, rays, floating bubbles) ----------
+  const BRAND = ['#FF4D5E', '#FFC93C', '#4CD964', '#B072FF', '#FF8A00', '#FF4D9A', '#00B4D8'];
+  function brandBg(c, t) {
+    const g = c.createRadialGradient(W / 2, 760, 120, W / 2, 860, 1500); g.addColorStop(0, '#8FDBFF'); g.addColorStop(1, '#3FA9F5'); c.fillStyle = g; c.fillRect(-W, -H, W * 3, H * 3);
+    c.save(); c.translate(W / 2, 760); c.rotate(t * 0.12); c.fillStyle = 'rgba(255,255,255,0.16)'; for (let i = 0; i < 16; i++) { c.beginPath(); c.moveTo(0, 0); c.arc(0, 0, 2200, (i / 16) * TAU, ((i + 0.5) / 16) * TAU); c.fill(); } c.restore();
+    for (let k = 0; k < 16; k++) { const sp = 0.05 + G.rnd(k, 3) * 0.06, a = (t * sp + G.rnd(k, 1)) % 1, r = 16 + G.rnd(k, 2) * 34, x = 60 + G.rnd(k, 4) * 900 + Math.sin(t * 1.3 + k) * 26, y = 1700 - a * 1900;
+      c.save(); c.globalAlpha = 0.85; c.beginPath(); c.arc(x, y, r, 0, TAU); c.fillStyle = 'rgba(255,255,255,0.18)'; c.fill(); c.lineWidth = 4; c.strokeStyle = 'rgba(255,255,255,0.9)'; c.stroke(); c.beginPath(); c.ellipse(x - r * 0.35, y - r * 0.35, r * 0.22, r * 0.12, -0.7, 0, TAU); c.fillStyle = '#fff'; c.fill(); c.restore(); }
+    c.fillStyle = 'rgba(255,255,255,0.22)'; c.fillRect(-W, 1430, W * 3, H); c.beginPath(); c.moveTo(-W, 1430); c.lineTo(W * 2, 1430); stroke(c, 5, 'rgba(255,255,255,0.7)');
+  }
+  function brandLetter(c, ch, x, y, size, col) {
+    c.save(); c.font = `700 ${size}px Baloo`; c.textAlign = 'center'; c.textBaseline = 'middle'; c.lineJoin = 'round';
+    c.save(); c.shadowColor = 'rgba(20,40,90,0.45)'; c.shadowBlur = 16; c.shadowOffsetX = 6; c.shadowOffsetY = 10; c.lineWidth = size * 0.26; c.strokeStyle = '#FFFFFF'; c.strokeText(ch, x, y); c.restore();
+    c.lineWidth = size * 0.07; c.strokeStyle = '#2A1E4A'; c.strokeText(ch, x, y); c.fillStyle = col; c.fillText(ch, x, y);
+    c.globalAlpha = 0.55; c.fillStyle = '#fff'; c.beginPath(); c.ellipse(x - size * 0.12, y - size * 0.2, size * 0.09, size * 0.045, -0.5, 0, TAU); c.fill(); c.restore();
+  }
+  // the title, word per line, each letter dropping in at its time and landing with a squash
+  function dropTitle(c, t, str, times, y0, size, lineH) {
+    c.save(); c.font = `700 ${size}px Baloo`; let gi = 0; const words = str.split(' ');
+    words.forEach((wd, li) => {
+      const ws = [...wd].map((ch) => c.measureText(ch).width + 6), total = ws.reduce((a, b) => a + b, 0), sc = Math.min(1, 860 / total);
+      let x = W / 2 - 40 - (total * sc) / 2;
+      [...wd].forEach((ch, i) => {
+        const t0 = times[gi + i], cx = x + (ws[i] * sc) / 2, y = y0 + li * lineH;
+        if (t0 !== null && t0 !== undefined && t >= t0) { const a = t - t0, fy = lerp(-700, 0, clamp(a / 0.22) ** 2), land = a > 0.22 ? Math.exp(-(a - 0.22) * 8) * Math.cos((a - 0.22) * 22) : 0; c.save(); c.translate(cx, y + fy + Math.sin(t * 2.4 + gi + i) * 6); c.scale(1 + 0.15 * land, 1 - 0.2 * land); c.rotate(((gi + i) % 2 ? 1 : -1) * 0.06); brandLetter(c, ch, 0, 0, size * sc, BRAND[(gi + i) % BRAND.length]); c.restore(); }
+        x += ws[i] * sc;
+      });
+      gi += wd.length + 1;
+    });
+    c.restore();
+  }
+
+
   // ---------- 1. title: letters drop, Yasin heads the ball on every beat ----------
   function dropLetters(c, t, str, times, cy, size, w0) {
     const letters = [...str], widths = letters.map((ch) => (ch === ' ' ? w0 * 0.45 : ch === ',' || ch === '!' ? w0 * 0.5 : w0)); let x = W / 2 - 40 - widths.reduce((a, b) => a + b, 0) / 2;
     letters.forEach((ch, i) => { const t0 = times[i]; if (t0 !== null && t >= t0) { const a = t - t0, fy = lerp(-700, 0, clamp(a / 0.22) ** 2), land = a > 0.22 ? Math.exp(-(a - 0.22) * 8) * Math.cos((a - 0.22) * 22) : 0; c.save(); c.translate(x + widths[i] / 2, cy + fy); c.scale(1 + 0.15 * land, 1 - 0.2 * land); c.rotate(Math.sin(t * 2 + i) * 0.04); word(c, ch, 0, 0, size, ['#FF5A4E', '#FFD23F', '#4FC3F7', '#7ED957'][i % 4], { sw: 0.16 }); c.restore(); } x += widths[i]; });
   }
   function title(c, t) {
-    bg(c, '#FFCF8A', '#FFF2D8'); sunburst(c, t); ground(c, 1430);
-    dropLetters(c, t, S.TITLE, S.letters, 360, 132, 90);
+    brandBg(c, t);
+    dropTitle(c, t, S.TITLE, S.letters, 300, 150, 150);
     const p1 = pop(t, T(1, 2), 0.45, 2.6);
-    if (p1 > 0) { c.save(); c.translate(W / 2 - 40, 530); c.scale(p1, p1); c.rotate(Math.sin((t - T(1, 2)) * 6) * Math.exp(-(t - T(1, 2)) * 2) * 0.1); c.beginPath(); c.roundRect(-420, -62, 840, 124, 62); c.fillStyle = '#FFFFFF'; c.fill(); stroke(c, 7); word(c, 'YASIN AND THE WINDOW', 0, 4, 54, '#2B4C7E', { sw: 0 }); c.restore(); }
+    if (p1 > 0) { c.save(); c.translate(W / 2 - 40, 575); c.scale(p1, p1); c.rotate(Math.sin((t - T(1, 2)) * 6) * Math.exp(-(t - T(1, 2)) * 2) * 0.1); c.beginPath(); c.roundRect(-420, -62, 840, 124, 62); c.fillStyle = '#FFFFFF'; c.fill(); stroke(c, 7); word(c, 'YASIN AND THE WINDOW', 0, 4, 54, '#2B4C7E', { sw: 0 }); c.restore(); }
     // Yasin heads the ball on every beat
     const on = t >= T(1), ph = beatPh(t), hop = on ? Math.sin(Math.PI * ph) : 0;
-    const r = stick(c, { ...YASIN, x: 330, gy: 1430, s: 0.62, bob: on ? 26 * hop : 0, lean: -0.04, tilt: -0.12, eyes: 'happy', mouth: 'grin', hands: [[-190, -130 - 30 * hop], [190, -130 - 30 * hop]], elbows: [40, 40], knees: [40 + 26 * (1 - hop), 40 + 26 * (1 - hop)] }, t);
+    const r = stick(c, { ...YASIN, x: 330, gy: 1430, s: 0.58, bob: on ? 26 * hop : 0, lean: -0.04, tilt: -0.12, eyes: 'happy', mouth: 'grin', hands: [[-190, -130 - 30 * hop], [190, -130 - 30 * hop]], elbows: [40, 40], knees: [40 + 26 * (1 - hop), 40 + 26 * (1 - hop)] }, t);
     const headTop = r.head[1] - r.R * 0.95;
-    const by = on ? headTop - 36 - 160 * Math.sin(Math.PI * ph) : 1392, bx = on ? r.head[0] - 10 : lerp(600, 380, io(clamp(t / T(1))));
+    const by = on ? headTop - 36 - 100 * Math.sin(Math.PI * ph) : 1392, bx = on ? r.head[0] - 10 : lerp(600, 380, io(clamp(t / T(1))));
     ball(c, bx, by, 38, t * 5, on ? 0.22 * Math.exp(-ph * 14) : 0);
     if (on) { const n = Math.floor((t - T(1)) / S.BEAT) + 1, k = pop(t, T(1) + (n - 1) * S.BEAT, 0.22, 3); word(c, String(n), 760, 1100, 130 * k, '#FFFFFF', { sw: 0.18 }); word(c, 'HEADERS!', 760, 1210, 42, '#2B4C7E', { sw: 0 }); }
   }
@@ -396,11 +428,11 @@
     stick(c, { ...YASIN, x: 230, gy: 1440, s: 0.42, bob: hop(t), eyes: 'happy', mouth: 'grin', hands: arms, elbows: [30, 30] }, t);
     stick(c, { ...FATHY, x: 720, gy: 1440, s: 0.42, bob: hop(t - 0.07), eyes: 'happy', mouth: 'grin', hands: arms, elbows: [30, 30] }, t);
   }
-  // ---------- 13. the ending: TOTA, TOTA! and the laugh loop ----------
+  // ---------- 13. the ending: THE END! and the laugh loop ----------
   function ending(c, t) {
-    bg(c, '#FFCF8A', '#FFF2D8'); sunburst(c, t); ground(c, 1430);
-    dropLetters(c, t, S.END_TITLE, S.endLetters, 380, 128, 92);
-    word(c, 'OUR STORY IS DONE!', W / 2 - 40, 520, 52, '#2B4C7E', { scale: pop(t, T(32), 0.4), sw: 0 });
+    brandBg(c, t);
+    dropTitle(c, t, S.END_TITLE, S.endLetters, 330, 150, 150);
+    word(c, 'OUR STORY IS DONE!', W / 2 - 40, 625, 52, '#2B4C7E', { scale: pop(t, T(32), 0.4), sw: 0 });
     const L1 = S.laughs[1][0], laugh = t >= L1;
     const cheer = { eyes: 'happy', mouth: 'grin', hands: [[-180, -560], [180, -560]], elbows: [30, 30] };
     const yo = laugh ? laughPose(t, { ...YASIN, x: 250, gy: 1430, s: 0.58, lean: -0.22, tilt: -0.1, feet: [[-80, 0], [70, 0]] }, 0, L1) : { ...YASIN, x: 250, gy: 1430, s: 0.58, bob: 18 * Math.sin(Math.PI * beatPh(t)), ...cheer };
@@ -408,7 +440,7 @@
     stick(c, yo, t); stick(c, fo, t);
     if (laugh) { laughShake(c, yo, t, 0); laughShake(c, fo, t, 1.7); }
     const p = pop(t, ev.sub, 0.4, 3);
-    if (p > 0) { c.save(); c.translate(W / 2 - 40, 660); c.scale(p, p); c.beginPath(); c.roundRect(-290, -66, 580, 132, 66); c.fillStyle = '#E63B2E'; c.fill(); stroke(c, 7); word(c, 'SUBSCRIBE', 40, 4, 56, '#FFFFFF', { sw: 0 }); const sw = Math.sin((t - ev.sub) * 14) * Math.exp(-(t - ev.sub) * 2) * 0.5; c.save(); c.translate(-205, 0); c.rotate(sw); c.beginPath(); c.moveTo(-28, 24); c.lineTo(-22, -14); c.quadraticCurveTo(0, -40, 22, -14); c.lineTo(28, 24); c.closePath(); c.fillStyle = '#FFD23F'; c.fill(); stroke(c, 5); c.beginPath(); c.arc(0, 30, 8, 0, TAU); c.fillStyle = '#FFD23F'; c.fill(); stroke(c, 4); c.restore(); c.restore(); }
+    if (p > 0) { c.save(); c.translate(W / 2 - 40, 770); c.scale(p, p); c.beginPath(); c.roundRect(-290, -66, 580, 132, 66); c.fillStyle = '#E63B2E'; c.fill(); stroke(c, 7); word(c, 'SUBSCRIBE', 40, 4, 56, '#FFFFFF', { sw: 0 }); const sw = Math.sin((t - ev.sub) * 14) * Math.exp(-(t - ev.sub) * 2) * 0.5; c.save(); c.translate(-205, 0); c.rotate(sw); c.beginPath(); c.moveTo(-28, 24); c.lineTo(-22, -14); c.quadraticCurveTo(0, -40, 22, -14); c.lineTo(28, 24); c.closePath(); c.fillStyle = '#FFD23F'; c.fill(); stroke(c, 5); c.beginPath(); c.arc(0, 30, 8, 0, TAU); c.fillStyle = '#FFD23F'; c.fill(); stroke(c, 4); c.restore(); c.restore(); }
   }
 
   // ---------- the shots ----------
@@ -471,7 +503,7 @@
   Studio.film({
     post: { vignette: 0.08, grain: 0, paper: 0 },
     fadeOut: 0.6,
-    async init() { VO = await Studio.loadJSON('out/voice.json'); SUBS = buildSubs(VO); },
+    async init() { const f = new FontFace('Baloo', 'url(lib/fonts/baloo-700.woff2)', { weight: '700' }); document.fonts.add(await f.load()); VO = await Studio.loadJSON('out/voice.json'); SUBS = buildSubs(VO); },
     draw(ctx, t) { film(ctx, t); drawSubs(ctx, t); },
   });
 })();

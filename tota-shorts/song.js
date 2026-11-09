@@ -1,4 +1,4 @@
-// TOTA TALES shorts: the shared soundtrack. A bouncy F-major groove (kick, claps, pizzicato, offbeat
+// BUBBLY TALES shorts: the shared soundtrack. A bouncy F-major groove (kick, claps, pizzicato, offbeat
 // plucks), every sound hit from score.sfx, letter pops on the titles, timpani on the lesson stamps, a
 // sung "too-ta too-ta" and real-sounding "ha ha" bursts on the laughs. Voices: ElevenLabs (out/.vo-cache).
 const path = require('path');
@@ -33,9 +33,9 @@ const scale = [m('F5'), m('G5'), m('A5'), m('Bb5'), m('C6'), m('D6'), m('E6'), m
 for (const list of [sc.letters, sc.endLetters]) list.filter((x) => x !== null).forEach((t, i) => { fx.addMono(I.pop(1400 + i * 120, 70 + i), t + 0.22, 0.22); lead.addMono(I.marimba(scale[i % scale.length], { thock: 0.1 }), t + 0.22, 0.07); });
 // the lesson: a timpani + brass stab on each stamp
 for (const t of sc.moralStamps) { const c = chordAt(t + 0.01) || chordAt(T(0)); drums.addMono(I.timpani(c.bass + 12, { decay: 0.9 }), t, 0.5); for (const n of c.notes) { const x = I.brassNote(n, BEAT * 0.5, { stab: true, bright: 0.9, seed: n }); keys.addStereo(x.L, x.R, t, 0.05); } }
-// the sung "too-ta too-ta" right after the last line
+// the sung "bub-ble bub-ble" right after the last line
 { const t0 = L.tota.end + 0.1, notes = [0, 1, 2, 3].map((i) => ({ t: i * BEAT / 2, dur: BEAT * 0.45, midi: m(i % 2 ? 'A4' : 'C5') }));
-  for (const [k, type] of [[0, 'alto'], [1, 'soprano']]) { const x = Sing.line('too-ta too-ta', notes, { type, vib: 0.1, bright: 1.2, seed: 40 + k }); sing.addMono(x, t0 - x.lead, 0.3, k ? 0.2 : -0.2); verb.addMono(x, t0 - x.lead, 0.08); }
+  for (const [k, type] of [[0, 'alto'], [1, 'soprano']]) { const x = Sing.line('buh-bul buh-bul', notes, { type, vib: 0.1, bright: 1.2, seed: 40 + k }); sing.addMono(x, t0 - x.lead, 0.3, k ? 0.2 : -0.2); verb.addMono(x, t0 - x.lead, 0.08); }
   notes.forEach((n) => lead.addMono(I.marimba(n.midi), t0 + n.t, 0.22)); }
 // every sound effect the episode asks for
 const SFX = {

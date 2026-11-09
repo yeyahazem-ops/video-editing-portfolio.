@@ -1,4 +1,4 @@
-// TOTA TALES toolkit: the stick-comic cast, expressions, props, rooms and shared scenes. Every pose is a
+// BUBBLY TALES toolkit: the stick-comic cast, expressions, props, rooms and shared scenes. Every pose is a
 // pure function of t, eased between states, so motion stays smooth at 60 fps.
 (function () {
   const G = globalThis.G, Subs = globalThis.Subs, Shots = globalThis.Shots, S = globalThis.SCORE, Studio = globalThis.Studio;
@@ -329,13 +329,45 @@
   }
   function bathroom(c) { c.fillStyle = '#D9F0F2'; c.fillRect(-W, -H, W * 3, H * 3); c.strokeStyle = 'rgba(21,21,21,0.12)'; c.lineWidth = 3; for (let i = -12; i < 30; i++) { c.beginPath(); c.moveTo(i * 90, -H); c.lineTo(i * 90, H * 2); c.stroke(); c.beginPath(); c.moveTo(-W, i * 90); c.lineTo(W * 2, i * 90); c.stroke(); } c.fillStyle = '#B9C7CC'; c.fillRect(-W, 1430, W * 3, H); c.beginPath(); c.moveTo(-W, 1430); c.lineTo(W * 2, 1430); stroke(c, 7); }
 
+
+  // ---------- the brand: the logo's look (sticker letters, blue sky, rays, floating bubbles) ----------
+  const BRAND = ['#FF4D5E', '#FFC93C', '#4CD964', '#B072FF', '#FF8A00', '#FF4D9A', '#00B4D8'];
+  function brandBg(c, t) {
+    const g = c.createRadialGradient(W / 2, 760, 120, W / 2, 860, 1500); g.addColorStop(0, '#8FDBFF'); g.addColorStop(1, '#3FA9F5'); c.fillStyle = g; c.fillRect(-W, -H, W * 3, H * 3);
+    c.save(); c.translate(W / 2, 760); c.rotate(t * 0.12); c.fillStyle = 'rgba(255,255,255,0.16)'; for (let i = 0; i < 16; i++) { c.beginPath(); c.moveTo(0, 0); c.arc(0, 0, 2200, (i / 16) * TAU, ((i + 0.5) / 16) * TAU); c.fill(); } c.restore();
+    for (let k = 0; k < 16; k++) { const sp = 0.05 + G.rnd(k, 3) * 0.06, a = (t * sp + G.rnd(k, 1)) % 1, r = 16 + G.rnd(k, 2) * 34, x = 60 + G.rnd(k, 4) * 900 + Math.sin(t * 1.3 + k) * 26, y = 1700 - a * 1900;
+      c.save(); c.globalAlpha = 0.85; c.beginPath(); c.arc(x, y, r, 0, TAU); c.fillStyle = 'rgba(255,255,255,0.18)'; c.fill(); c.lineWidth = 4; c.strokeStyle = 'rgba(255,255,255,0.9)'; c.stroke(); c.beginPath(); c.ellipse(x - r * 0.35, y - r * 0.35, r * 0.22, r * 0.12, -0.7, 0, TAU); c.fillStyle = '#fff'; c.fill(); c.restore(); }
+    c.fillStyle = 'rgba(255,255,255,0.22)'; c.fillRect(-W, 1430, W * 3, H); c.beginPath(); c.moveTo(-W, 1430); c.lineTo(W * 2, 1430); stroke(c, 5, 'rgba(255,255,255,0.7)');
+  }
+  function brandLetter(c, ch, x, y, size, col) {
+    c.save(); c.font = `700 ${size}px Baloo`; c.textAlign = 'center'; c.textBaseline = 'middle'; c.lineJoin = 'round';
+    c.save(); c.shadowColor = 'rgba(20,40,90,0.45)'; c.shadowBlur = 16; c.shadowOffsetX = 6; c.shadowOffsetY = 10; c.lineWidth = size * 0.26; c.strokeStyle = '#FFFFFF'; c.strokeText(ch, x, y); c.restore();
+    c.lineWidth = size * 0.07; c.strokeStyle = '#2A1E4A'; c.strokeText(ch, x, y); c.fillStyle = col; c.fillText(ch, x, y);
+    c.globalAlpha = 0.55; c.fillStyle = '#fff'; c.beginPath(); c.ellipse(x - size * 0.12, y - size * 0.2, size * 0.09, size * 0.045, -0.5, 0, TAU); c.fill(); c.restore();
+  }
+  // the title, word per line, each letter dropping in at its time and landing with a squash
+  function dropTitle(c, t, str, times, y0, size, lineH) {
+    c.save(); c.font = `700 ${size}px Baloo`; let gi = 0; const words = str.split(' ');
+    words.forEach((wd, li) => {
+      const ws = [...wd].map((ch) => c.measureText(ch).width + 6), total = ws.reduce((a, b) => a + b, 0), sc = Math.min(1, 860 / total);
+      let x = W / 2 - 40 - (total * sc) / 2;
+      [...wd].forEach((ch, i) => {
+        const t0 = times[gi + i], cx = x + (ws[i] * sc) / 2, y = y0 + li * lineH;
+        if (t0 !== null && t0 !== undefined && t >= t0) { const a = t - t0, fy = lerp(-700, 0, clamp(a / 0.22) ** 2), land = a > 0.22 ? Math.exp(-(a - 0.22) * 8) * Math.cos((a - 0.22) * 22) : 0; c.save(); c.translate(cx, y + fy + Math.sin(t * 2.4 + gi + i) * 6); c.scale(1 + 0.15 * land, 1 - 0.2 * land); c.rotate(((gi + i) % 2 ? 1 : -1) * 0.06); brandLetter(c, ch, 0, 0, size * sc, BRAND[(gi + i) % BRAND.length]); c.restore(); }
+        x += ws[i] * sc;
+      });
+      gi += wd.length + 1;
+    });
+    c.restore();
+  }
+
   // ---------- shared scenes ----------
   const L = S.L;
   function titleScene(c, t, hero = 'yasin') {
-    bg(c, '#FFCF8A', '#FFF2D8'); sunburst(c, t); ground(c, 1430);
-    dropLetters(c, t, S.TITLE, S.letters, 360, 132, 90);
+    brandBg(c, t);
+    dropTitle(c, t, S.TITLE, S.letters, 300, 150, 150);
     const t0 = L.title.t + 1.0, p1 = pop(t, t0, 0.45, 2.6);
-    if (p1 > 0) { c.save(); c.translate(W / 2 - 40, 530); c.scale(p1, p1); c.rotate(Math.sin((t - t0) * 6) * Math.exp(-(t - t0) * 2) * 0.1); c.font = '400 54px Bungee'; const tw = Math.max(560, c.measureText(S.title).width + 90); c.beginPath(); c.roundRect(-tw / 2, -62, tw, 124, 62); c.fillStyle = '#FFFFFF'; c.fill(); stroke(c, 7); word(c, S.title, 0, 4, S.title.length > 18 ? 46 : 54, '#2B4C7E', { sw: 0 }); c.restore(); }
+    if (p1 > 0) { c.save(); c.translate(W / 2 - 40, 590); c.scale(p1, p1); c.rotate(Math.sin((t - t0) * 6) * Math.exp(-(t - t0) * 2) * 0.1); c.font = '400 54px Bungee'; const tw = Math.max(560, c.measureText(S.title).width + 90); c.beginPath(); c.roundRect(-tw / 2, -62, tw, 124, 62); c.fillStyle = '#FFFFFF'; c.fill(); stroke(c, 7); word(c, S.title, 0, 4, S.title.length > 18 ? 46 : 54, '#2B4C7E', { sw: 0 }); c.restore(); }
     const hop = Math.sin(Math.PI * beatPh(t));
     stick(c, { ...CAST[hero], x: 360, gy: 1430, s: SIZE[hero] * 1.05, bob: 20 * hop, eyes: 'happy', mouth: 'grin', hands: [[-180, -560], [180, -560]], elbows: [30, 30], knees: [40 + 20 * (1 - hop), 40 + 20 * (1 - hop)] }, t);
     if (S.cast.includes('cat')) cat(c, { x: 760, gy: 1430, s: 0.7, eyes: 'happy', bob: 24 * Math.sin(Math.PI * beatPh(t + S.BEAT / 2)) }, t);
@@ -354,9 +386,9 @@
     if (cast.includes('cat')) cat(c, { x: people.length > 1 ? 470 : 720, gy: 1440, s: 0.45, eyes: 'happy', bob: hop(t - 0.12) }, t);
   }
   function endingScene(c, t, cast = S.cast) {
-    bg(c, '#FFCF8A', '#FFF2D8'); sunburst(c, t); ground(c, 1430);
-    dropLetters(c, t, S.END_TITLE, S.endLetters, 380, 128, 92);
-    word(c, 'OUR STORY IS DONE!', W / 2 - 40, 520, 52, '#2B4C7E', { scale: pop(t, L.tota.t + 1.2, 0.4), sw: 0 });
+    brandBg(c, t);
+    dropTitle(c, t, S.END_TITLE, S.endLetters, 330, 150, 150);
+    word(c, 'OUR STORY IS DONE!', W / 2 - 40, 625, 52, '#2B4C7E', { scale: pop(t, L.tota.t + 1.2, 0.4), sw: 0 });
     const [L1] = S.laughs[S.laughs.length - 1], laugh = t >= L1, cheer = { eyes: 'happy', mouth: 'grin', hands: [[-180, -560], [180, -560]], elbows: [30, 30] };
     const people = cast.filter((w) => w !== 'cat').slice(0, 2), xs = people.length > 1 ? [250, 720] : [330];
     people.forEach((w, i) => {
@@ -366,7 +398,7 @@
     });
     if (cast.includes('cat')) cat(c, { x: people.length > 1 ? 480 : 760, gy: 1430, s: 0.55, eyes: 'happy', mouth: laugh ? 'meow' : 'smile', bob: 22 * Math.sin(Math.PI * beatPh(t + 0.2)) }, t);
     const p = pop(t, L.tota.end - 0.6, 0.4, 3);
-    if (p > 0) { c.save(); c.translate(W / 2 - 40, 660); c.scale(p, p); c.beginPath(); c.roundRect(-290, -66, 580, 132, 66); c.fillStyle = '#E63B2E'; c.fill(); stroke(c, 7); word(c, 'SUBSCRIBE', 40, 4, 56, '#FFFFFF', { sw: 0 }); c.save(); c.translate(-205, 0); c.rotate(Math.sin((t - L.tota.end) * 14) * Math.exp(-Math.max(0, t - L.tota.end) * 2) * 0.5); c.beginPath(); c.moveTo(-28, 24); c.lineTo(-22, -14); c.quadraticCurveTo(0, -40, 22, -14); c.lineTo(28, 24); c.closePath(); c.fillStyle = '#FFD23F'; c.fill(); stroke(c, 5); c.restore(); c.restore(); }
+    if (p > 0) { c.save(); c.translate(W / 2 - 40, 770); c.scale(p, p); c.beginPath(); c.roundRect(-290, -66, 580, 132, 66); c.fillStyle = '#E63B2E'; c.fill(); stroke(c, 7); word(c, 'SUBSCRIBE', 40, 4, 56, '#FFFFFF', { sw: 0 }); c.save(); c.translate(-205, 0); c.rotate(Math.sin((t - L.tota.end) * 14) * Math.exp(-Math.max(0, t - L.tota.end) * 2) * 0.5); c.beginPath(); c.moveTo(-28, 24); c.lineTo(-22, -14); c.quadraticCurveTo(0, -40, 22, -14); c.lineTo(28, 24); c.closePath(); c.fillStyle = '#FFD23F'; c.fill(); stroke(c, 5); c.restore(); c.restore(); }
   }
   // a hook card: the dramatic frame, then a big question pops on top
   function hookText(c, t, lines) { const t0 = 0.15; lines.forEach(([txt, col], i) => word(c, txt, W / 2 - 40, 330 + i * 110, i ? 96 : 70, col, { scale: pop(t, t0 + i * 0.25, 0.3, 3), rot: (i % 2 ? 0.04 : -0.04), sw: 0.2 })); }
@@ -406,8 +438,8 @@
   // the episode hands over its shot list; captions are drawn on top
   function run(shots) {
     const film = Shots.film(shots);
-    Studio.film({ post: { vignette: 0.08, grain: 0, paper: 0 }, fadeOut: 0.5, async init() { VO = await Studio.loadJSON('out/voice.json'); SUBS = buildSubs(VO); }, draw(ctx, t) { CTX = ctx; film(ctx, t); drawSubs(ctx, t); } });
+    Studio.film({ post: { vignette: 0.08, grain: 0, paper: 0 }, fadeOut: 0.5, async init() { const f = new FontFace('Baloo', 'url(lib/fonts/baloo-700.woff2)', { weight: '700' }); document.fonts.add(await f.load()); VO = await Studio.loadJSON('out/voice.json'); SUBS = buildSubs(VO); }, draw(ctx, t) { CTX = ctx; film(ctx, t); drawSubs(ctx, t); } });
   }
 
-  globalThis.TK = { clamp, lerp, io, outBack, ramp, pop, beatPh, stroke, shade, word, bg, ground, shadow, ball, tearDrop, sweatDrop, heart, star, arcs, speedLines, sunburst, confetti, stick, laughPose, laughShake, YASIN, FATHY, MAMA, LAILA, LEO, CAST, SIZE, blinkAt, talking, house, HOUSE, dropLetters, cat, sandwich, bowl, robot, sofa, bed, flowerPot, sink, goal, flashlightBeam, holdFlashlight, holdSandwich, holdCup, room, yard, bathroom, titleScene, moralScene, endingScene, hookText, Cmb, push, hold, look, bumps, run, INK, W, H, TAU, SAFE };
+  globalThis.TK = { clamp, lerp, io, outBack, ramp, pop, beatPh, stroke, shade, word, bg, ground, shadow, ball, tearDrop, sweatDrop, heart, star, arcs, speedLines, sunburst, confetti, stick, laughPose, laughShake, YASIN, FATHY, MAMA, LAILA, LEO, CAST, SIZE, blinkAt, talking, house, HOUSE, dropLetters, cat, sandwich, bowl, robot, sofa, bed, flowerPot, sink, goal, flashlightBeam, holdFlashlight, holdSandwich, holdCup, room, yard, bathroom, brandBg, dropTitle, brandLetter, titleScene, moralScene, endingScene, hookText, Cmb, push, hold, look, bumps, run, INK, W, H, TAU, SAFE };
 })();

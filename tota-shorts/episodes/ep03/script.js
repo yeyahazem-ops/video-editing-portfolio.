@@ -31,7 +31,7 @@
   {
    "id": "title",
    "who": "narrator",
-   "text": "Tota Tales! Laila and the Shadow!",
+   "text": "Bubbly Tales! Laila and the Shadow!",
    "gap": 0.3
   },
   {
@@ -85,7 +85,7 @@
   {
    "id": "tota",
    "who": "narrator",
-   "text": "Tota, tota, our story is done! Did you like it? Wasn't it fun?",
+   "text": "Bubble, bubble, our story is done! Did you like it? Wasn't it fun?",
    "gap": 0.8
   }
  ]

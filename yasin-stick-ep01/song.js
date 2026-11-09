@@ -3,7 +3,7 @@
 // A bouncy F-major marimba/pizzicato groove; Yasin's ball touches PLAY the hook; a riser on the kick,
 // glass + a record scratch on the crash and then silence; a tiptoe in D minor while he hides; a music
 // box for mama's words; three knocks on the door; warm strings when Uncle Fathy smiles; hammer taps,
-// the moral stamped with timpani, and the sung «too-ta too-ta» that opens and closes every episode.
+// the moral stamped with timpani, and the sung «bub-ble bub-ble» that opens and closes every episode.
 // The voices are ElevenLabs speech, cached in out/.vo-cache by tools/eleven.js.
 const path = require('path');
 const { SR, Bus, reverb } = require('./engine/audio/dsp');
@@ -60,10 +60,10 @@ function strings(t0, t1, gain = 0.05) {
 const melody = (notes, inst, g, tr = 0) => { for (const n of notes) { const x = inst(n.midi + tr); lead.addMono(x, n.t, g); verb.addMono(x, n.t, g * 0.35); } };
 const mbox = (midi) => I.musicBox(midi, { decay: 1.2 });
 const marim = (midi) => I.marimba(midi, { thock: 0.15 });
-// the sung «too-ta too-ta!» (alto + soprano, doubled by marimba)
+// the sung «bub-ble bub-ble!» (alto + soprano, doubled by marimba)
 function sungTota(notes) {
   for (const [k, type] of [[0, 'alto'], [1, 'soprano']]) {
-    const x = Sing.line('too-ta too-ta', notes.map((n) => ({ ...n, t: n.t - notes[0].t, midi: n.midi + (k ? 0.05 : 0) })), { type, vib: 0.1, bright: 1.2, seed: 40 + k });
+    const x = Sing.line('buh-bul buh-bul', notes.map((n) => ({ ...n, t: n.t - notes[0].t, midi: n.midi + (k ? 0.05 : 0) })), { type, vib: 0.1, bright: 1.2, seed: 40 + k });
     sing.addMono(x, notes[0].t - x.lead, 0.32, k ? 0.2 : -0.2);
     verb.addMono(x, notes[0].t - x.lead, 0.1);
   }

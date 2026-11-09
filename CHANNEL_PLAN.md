@@ -1,4 +1,4 @@
-# خطة قناة «Tota Tales» 📚✨
+# خطة قناة «Bubbly Tales» 📚✨
 
 قناة يوتيوب **بالإنجليزي** للأطفال من **6 لـ 10 سنين** حول العالم. كل حلقة كرتون قصيرة فيها حدوتة لطيفة ودرس أخلاقي واحد واضح.
 
@@ -10,9 +10,9 @@
 
 | العنصر | التفاصيل |
 |---|---|
-| **الاسم** | **Tota Tales** |
+| **الاسم** | **Bubbly Tales** |
 | **الشعار (Slogan)** | *"Little stories, big hearts."* |
-| **اللازمة الثابتة** | كل حلقة تبدأ بلحن «too-ta too-ta» وجملة *"Tota Tales! Today's story: …"*، وتخلص بـ *"Tota, tota, our story is done! Did you like it? Wasn't it fun?"*. اللحن نفسه في الأول والآخر، فالطفل يحفظه ويغنيه |
+| **اللازمة الثابتة** | كل حلقة تبدأ بلحن «bub-ble bub-ble» وجملة *"Bubbly Tales! Today's story: …"*، وتخلص بـ *"Bubble, bubble, our story is done! Did you like it? Wasn't it fun?"*. اللحن نفسه في الأول والآخر، فالطفل يحفظه ويغنيه |
 | **الألوان** | برتقالي `#FF6B4A`، أزرق `#2B4C7E`، أصفر شمس `#FFD45A`، وأخضر شبابيك `#3E8E6A` |
 | **الخطوط** | Bungee للعناوين والمؤثرات (KICK! / CRASH!)، وPatrick Hand للكلام والترجمة |
 | **الشخصيات** | **Yasin** (8 سنين، تيشيرت أحمر رقم 10، بيحب الكورة)، **Uncle Fathy** (الجار الطيب)، **Mama**، والقطة. وممكن نضيف بعدين: **Laila** أخت ياسين الصغيرة، **Grandpa**، **Ms. Salma** المدرّسة، و**Leo** صاحب ياسين الجديد |
@@ -21,10 +21,10 @@
 
 ## 2. القالب الثابت لكل حلقة
 
-1. **Intro (0–10 ثواني):** لحن «Tota Tales» واسم الحلقة.
+1. **Intro (0–10 ثواني):** لحن «bub-ble bub-ble» واسم الحلقة.
 2. **The story (60–120 ثانية):** *"Once upon a time…"* ← المشكلة ← اللحظة الصعبة ← القرار الصح ← النهاية السعيدة.
 3. **Lesson card (10 ثواني):** جملة واحدة كبيرة بتظهر كلمة كلمة على الإيقاع.
-4. **Outro (10 ثواني):** *"Tota, tota, our story is done!"* + SUBSCRIBE + *"See you in the next story!"*
+4. **Outro (10 ثواني):** *"Bubble, bubble, our story is done!"* + SUBSCRIBE + *"See you in the next story!"*
 
 ## 3. أول 30 حلقة
 
@@ -64,8 +64,8 @@
 ## 4. مواعيد النشر (على توقيت الجمهور الأجنبي)
 
 - **حلقة طويلة كل أسبوع.** مثلاً يوم السبت الساعة **3 العصر بتوقيت مصر**، وده الصبح في أمريكا ووقت الضهر في بريطانيا، وقت ما الأطفال قاعدين مع أهلهم في الويك إند.
-- **2–3 Shorts في الأسبوع:** نسخة رأسي من الحلقة، ولحن «Tota Tales» لوحده، و*"What would YOU do?"* (لو انت مكان ياسين كنت هتعمل إيه؟).
-- بعد كل 10 حلقات: **تجميعة ساعة** *(Tota Tales: 1 Hour of Bedtime Stories)*. التجميعات بتجيب مشاهدات كبيرة جداً في قنوات الأطفال.
+- **2–3 Shorts في الأسبوع:** نسخة رأسي من الحلقة، ولحن «bub-ble bub-ble» لوحده، و*"What would YOU do?"* (لو انت مكان ياسين كنت هتعمل إيه؟).
+- بعد كل 10 حلقات: **تجميعة ساعة** *(Bubbly Tales: 1 Hour of Bedtime Stories)*. التجميعات بتجيب مشاهدات كبيرة جداً في قنوات الأطفال.
 
 ## 5. إعدادات يوتيوب للأطفال
 
@@ -79,16 +79,16 @@
 ## 6. العنوان والوصف والكلمات المفتاحية
 
 **مثال عنوان:**
-`Yasin and the Window ⚽🪟 | Honesty Story for Kids | Tota Tales`
+`Yasin and the Window ⚽🪟 | Honesty Story for Kids | Bubbly Tales`
 
 **مثال وصف:**
 > Yasin loves football… but one big kick breaks Uncle Fathy's window! 😮 Will he hide, or tell the truth?
 > 💛 Today's lesson: *Everyone makes mistakes, but brave kids tell the truth!*
-> 📚 Tota Tales: short animated stories with big hearts, for kids aged 6–10. A new story every week!
+> 📚 Bubbly Tales: short animated stories with big hearts, for kids aged 6–10. A new story every week!
 >
 > 👪 For parents: ask your child, "What would YOU do if you were Yasin?"
 
-**الكلمات المفتاحية:** kids stories, bedtime stories for kids, moral stories for kids, honesty story, cartoon for kids, stories for kids in English, short stories for children, kindergarten stories, Tota Tales
+**الكلمات المفتاحية:** kids stories, bedtime stories for kids, moral stories for kids, honesty story, cartoon for kids, stories for kids in English, short stories for children, kindergarten stories, Bubbly Tales
 
 **الصورة المصغرة:** وش ياسين كبير ومتفاجئ والشباك المكسور وراه، وكلمتين بس بخط Bungee كبير: **"OOPS!"** أو **"HIDE?!"**
 

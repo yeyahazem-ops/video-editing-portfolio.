@@ -1,8 +1,8 @@
-// TOTA TALES — Episode 1: «Yasin and the Window» (9:16 stick-figure comic, 60 fps, ~84s, for children 6–10, English).
+// BUBBLY TALES — Episode 1: «Yasin and the Window» (9:16 stick-figure comic, 60 fps, ~84s, for children 6–10, English).
 // Yasin loves football; one big kick breaks Uncle Fathy's window. He wants to hide, remembers what
 // mama says ("honesty is always best"), knocks on the door and owns up. Uncle Fathy smiles, they
 // fix the window together and become friends. Moral card, then the signature ending
-// "Tota, tota, our story is done!". Every voice line, ball touch, knock and stamp is timed here.
+// "Bubble, bubble, our story is done!". Every voice line, ball touch, knock and stamp is timed here.
 // All characters are made up.
 (function () {
   const node = typeof require !== 'undefined';
@@ -49,7 +49,7 @@
   const HOOK_A = [['C5', 0, 1], ['A4', 1, 1], ['C5', 2, 1], ['A4', 3, 1], ['F5', 4, 1], ['E5', 5, 1], ['D5', 6, 2]];
   const HOOK_B = [['Bb4', 0, 1], ['C5', 1, 1], ['D5', 2, 1], ['C5', 3, 1], ['A4', 4, 1], ['G4', 5, 1], ['F4', 6, 2]];
   const hook = (bar, tr = 0) => [...placeBar(clock, HOOK_A, bar, tr), ...placeBar(clock, HOOK_B, bar + 1, tr)];
-  // the sung «too-ta too-ta!» at the very start and the very end
+  // the sung «bub-ble bub-ble!» at the very start and the very end
   const sungAt = [T(0), T(33)];
   const sung = sungAt.map((t0) => [0, 1, 2, 3].map((i) => ({ t: t0 + i * BEAT / 2, dur: BEAT * 0.45, midi: m(i % 2 ? 'A4' : 'C5') })));
 
@@ -70,7 +70,7 @@
 
   // ---------- extra animation hits (each one has a sound in song.js) ----------
   // the title letters drop in one by one on 16th notes (a pop each), the same at the ending
-  const TITLE = 'TOTA TALES', END_TITLE = 'TOTA, TOTA!';
+  const TITLE = 'BUBBLY TALES', END_TITLE = 'THE END!';
   const dropTimes = (str, t0) => { const out = []; let k = 0; for (const ch of str) { out.push(ch === ' ' ? null : t0 + k * BEAT / 4); if (ch !== ' ') k++; } return out; };
   const letters = dropTimes(TITLE, T(0, 0.25));
   const endLetters = dropTimes(END_TITLE, ev.end + 0.05);
@@ -86,7 +86,7 @@
   const NARR = 'JBFqnCBsd6RMkjVDRZzb', KID = 'cgSgspJ2msm6clMCkdW9', OLD = 'pqHfZKP75CvOlQylNhV4';
   const V = (id, at, who, voice, text) => ({ id, at, who, voice, text });
   const vo = [
-    V('title', T(1), 'narrator', NARR, 'Tota Tales! Today\'s story: Yasin and the Window.'),
+    V('title', T(1), 'narrator', NARR, 'Bubbly Tales! Today\'s story: Yasin and the Window.'),
     V('once', T(4, 1), 'narrator', NARR, 'Once upon a time, in a sunny little neighborhood, there lived a boy named Yasin.'),
     V('ball', T(6, 3.1), 'narrator', NARR, 'Yasin loved football more than anything!'),
     V('kick', T(8), 'narrator', NARR, 'One day, he kicked the ball really hard...'),
@@ -100,7 +100,7 @@
     V('fathy', T(22), 'fathy', OLD, 'You told the truth, so I\'m not angry. Let\'s fix it together!'),
     V('fix', T(25), 'narrator', NARR, 'So they fixed the window together, and became the best of friends.'),
     V('moral', T(28, 2), 'narrator', NARR, 'Everyone makes mistakes... but brave kids tell the truth!'),
-    V('tota', T(31, 1), 'narrator', NARR, 'Tota, tota, our story is done! Did you like it? Wasn\'t it fun?'),
+    V('tota', T(31, 1), 'narrator', NARR, 'Bubble, bubble, our story is done! Did you like it? Wasn\'t it fun?'),
   ];
 
   const markers = {
