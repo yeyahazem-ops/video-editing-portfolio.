@@ -1,4 +1,4 @@
-// THE SONG for «ياسين والشباك»: every sound comes from an event in score.js.
+// THE SONG for «Yasin and the Window»: every sound comes from an event in score.js.
 //   node song.js   (STEMS=1 writes stems, LUFS=-14 sets loudness)
 // A bouncy F-major marimba/pizzicato groove; Yasin's ball touches PLAY the hook; a riser on the kick,
 // glass + a record scratch on the crash and then silence; a tiptoe in D minor while he hides; a music

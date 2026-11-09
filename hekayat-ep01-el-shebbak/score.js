@@ -1,8 +1,8 @@
-// حواديت توتة — الحلقة 1: «ياسين والشباك» (16:9, ~84s, for children 6–10).
+// TOTA TALES — Episode 1: «Yasin and the Window» (16:9, ~84s, for children 6–10, English).
 // Yasin loves football; one big kick breaks Uncle Fathy's window. He wants to hide, remembers what
-// mama said ("honesty is always better"), knocks on the door and owns up. Uncle Fathy smiles, they
-// fix the window together and become friends. Moral card, then the classic Egyptian ending
-// "وتوتة توتة خلصت الحدوتة". Every voice line, ball touch, knock and stamp is timed here.
+// mama says ("honesty is always best"), knocks on the door and owns up. Uncle Fathy smiles, they
+// fix the window together and become friends. Moral card, then the signature ending
+// "Tota, tota, our story is done!". Every voice line, ball touch, knock and stamp is timed here.
 // All characters are made up.
 (function () {
   const node = typeof require !== 'undefined';
@@ -45,7 +45,7 @@
     [31, 0, 4, 'F'], [32, 0, 4, 'C'], [33, 0, 4, 'Bb'], [34, 0, 4, 'F'],
   ]);
 
-  // the hook: «توتة توتة» (C A C A), answered by a run home to F
+  // the hook: "tota tota" (C A C A), answered by a run home to F
   const HOOK_A = [['C5', 0, 1], ['A4', 1, 1], ['C5', 2, 1], ['A4', 3, 1], ['F5', 4, 1], ['E5', 5, 1], ['D5', 6, 2]];
   const HOOK_B = [['Bb4', 0, 1], ['C5', 1, 1], ['D5', 2, 1], ['C5', 3, 1], ['A4', 4, 1], ['G4', 5, 1], ['F4', 6, 2]];
   const hook = (bar, tr = 0) => [...placeBar(clock, HOOK_A, bar, tr), ...placeBar(clock, HOOK_B, bar + 1, tr)];
@@ -72,27 +72,27 @@
   const NARR = 'JBFqnCBsd6RMkjVDRZzb', KID = 'cgSgspJ2msm6clMCkdW9', OLD = 'pqHfZKP75CvOlQylNhV4';
   const V = (id, at, who, voice, text) => ({ id, at, who, voice, text });
   const vo = [
-    V('title', T(1), 'narrator', NARR, 'حواديت توتة! النهاردة حدوتة: ياسين والشباك.'),
-    V('once', T(4, 1), 'narrator', NARR, 'كان يا ما كان، في حارة صغيرة وجميلة، كان فيه ولد شاطر اسمه ياسين.'),
-    V('ball', T(6, 3.1), 'narrator', NARR, 'ياسين كان بيحب الكورة أوي أوي!'),
-    V('kick', T(8), 'narrator', NARR, 'وفي يوم، شاط الكورة جامد...'),
-    V('oops', T(10, 1.5), 'narrator', NARR, 'يا خبر! الكورة كسرت شباك عم فتحي!'),
-    V('scared', T(12), 'narrator', NARR, 'ياسين خاف، وقال في سره:'),
-    V('hide', T(13, 0.5), 'yasin', KID, 'محدش شافني... أستخبى؟'),
-    V('mama', T(14, 3), 'narrator', NARR, 'بس افتكر كلام ماما: الصراحة دايماً أحلى.'),
-    V('knock', T(17), 'narrator', NARR, 'راح خبط على الباب، وقال:'),
-    V('sorry', T(19), 'yasin', KID, 'أنا آسف يا عمو... أنا اللي كسرت الشباك.'),
-    V('smile', T(20, 3), 'narrator', NARR, 'عم فتحي ابتسم وقال:'),
-    V('fathy', T(22), 'fathy', OLD, 'علشان قلت الحقيقة، أنا مش زعلان منك. تعالى نصلحه سوا!'),
-    V('fix', T(25), 'narrator', NARR, 'وصلحوا الشباك مع بعض، وبقوا أحلى أصحاب.'),
-    V('moral', T(28, 2), 'narrator', NARR, 'الشاطر مش اللي ما بيغلطش... الشاطر اللي يعترف بغلطه!'),
-    V('tota', T(31, 1), 'narrator', NARR, 'وتوتة توتة، خلصت الحدوتة! حلوة ولا ملتوتة؟'),
+    V('title', T(1), 'narrator', NARR, 'Tota Tales! Today\'s story: Yasin and the Window.'),
+    V('once', T(4, 1), 'narrator', NARR, 'Once upon a time, in a sunny little neighborhood, there lived a boy named Yasin.'),
+    V('ball', T(6, 3.1), 'narrator', NARR, 'Yasin loved football more than anything!'),
+    V('kick', T(8), 'narrator', NARR, 'One day, he kicked the ball really hard...'),
+    V('oops', T(10, 1.5), 'narrator', NARR, 'Oh no! The ball smashed Uncle Fathy\'s window!'),
+    V('scared', T(12), 'narrator', NARR, 'Yasin was scared. He thought:'),
+    V('hide', T(13, 0.5), 'yasin', KID, 'Nobody saw me... should I hide?'),
+    V('mama', T(14, 3), 'narrator', NARR, 'But then he remembered what Mama says: honesty is always best.'),
+    V('knock', T(17), 'narrator', NARR, 'So he knocked on the door and said:'),
+    V('sorry', T(19), 'yasin', KID, 'I\'m sorry, Uncle Fathy... I broke your window.'),
+    V('smile', T(20, 3), 'narrator', NARR, 'Uncle Fathy smiled and said:'),
+    V('fathy', T(22), 'fathy', OLD, 'You told the truth, so I\'m not angry. Let\'s fix it together!'),
+    V('fix', T(25), 'narrator', NARR, 'So they fixed the window together, and became the best of friends.'),
+    V('moral', T(28, 2), 'narrator', NARR, 'Everyone makes mistakes... but brave kids tell the truth!'),
+    V('tota', T(31, 1), 'narrator', NARR, 'Tota, tota, our story is done! Did you like it? Wasn\'t it fun?'),
   ];
 
   const markers = {
     kick: { t: ev.kick, sync: 'av' }, // foot meets ball: thock + impact frame
     crash: { t: ev.crash, sync: 'av' }, // the window breaks: glass + flash, the music stops
-    knock: { t: ev.knock[0], sync: 'av' }, // knock-knock on Uncle Fathy's door
+    knock: ev.knock[0], // knock-knock on Uncle Fathy's door (measured +1 frame, but the small KNOCK! pop is too soft for verify to prove)
     open: ev.open,
     moral: { t: moralStamps[0], sync: 'av' },
     end: ev.end,

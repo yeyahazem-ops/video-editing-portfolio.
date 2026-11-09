@@ -15,7 +15,7 @@ const key = (l) => crypto.createHash('sha1').update(JSON.stringify(['none', l.vo
   for (const l of sc.vo) {
     const k = key(l);
     if (fs.existsSync(path.join(CACHE, k + '.f32'))) continue;
-    const body = { text: l.say || l.text, model_id: 'eleven_v3', language_code: 'ar', voice_settings: { stability: 0.5, similarity_boost: 0.75 } };
+    const body = { text: l.say || l.text, model_id: 'eleven_multilingual_v2', language_code: l.lang || 'en', voice_settings: { stability: 0.5, similarity_boost: 0.75 } };
     const tmp = path.join(CACHE, k + '.req.json');
     fs.writeFileSync(tmp, JSON.stringify(body));
     const res = execFileSync('curl', ['-sS', '-X', 'POST', `https://api.elevenlabs.io/v1/text-to-speech/${l.voice}/with-timestamps?output_format=mp3_44100_128`,

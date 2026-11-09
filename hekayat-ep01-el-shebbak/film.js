@@ -1,4 +1,4 @@
-// THE FILM: «ياسين والشباك». A list of shots (Shots.film); every frame is a pure function of t.
+// THE FILM: «Yasin and the Window». A list of shots (Shots.film); every frame is a pure function of t.
 // Mouths move with the ElevenLabs voices (out/voice.json); captions are their words.
 (function () {
   const U = globalThis.U, G = globalThis.G, Ch = globalThis.Ch, Subs = globalThis.Subs, Shots = globalThis.Shots, S = globalThis.SCORE, Studio = globalThis.Studio;
@@ -19,7 +19,7 @@
   // ---------- helpers ----------
   const mouthOf = (who, t) => { const m = Subs.mouth(VO, t, who); return m.talking ? m : null; };
   const blinkAt = (t, seed) => { const p = (t + seed * 0.37) % 3.3; return p < 0.12 ? 1 : 0; };
-  const AR = (ctx, str, x, y, o = {}) => G.text(ctx, str, x, y, { fam: 'Noto Naskh Arabic', weight: 700, lang: 'ar', align: 'center', ...o });
+  const AR = (ctx, str, x, y, o = {}) => G.text(ctx, str, x, y, { fam: 'Patrick Hand', weight: 400, align: 'center', ...o });
   const pop = (t, t0, d = 0.3, k = 2.4) => (t < t0 ? 0 : ease.outBack(clamp((t - t0) / d), k));
 
   function ball(ctx, x, y, r, spin = 0, squash = 0) {
@@ -76,7 +76,7 @@
       G.ellipse(ctx, x + dw * 0.84, y + h * 0.5, 10, 10, { fill: '#F2C94C', lw: 3, seed: seed + 5 });
     }
   }
-  // the alley (حارة): houses, a lantern, laundry, Uncle Fathy's house on the right.
+  // the alley: houses, a lantern, laundry, Uncle Fathy's house on the right.
   // `inside(ctx)` draws whoever stands in the open doorway (before the door panel).
   const HX = 1100, GY = 905;
   const DX = HX + 470, DOORW = 180, DOORY = 430;
@@ -96,7 +96,7 @@
     // laundry line across the alley
     G.line(ctx, [[120, 330], [560, 370], [980, 340]], { color: INK, lw: 2.5, seed: 450 });
     ['#E77FA0', '#F2B84B', '#5DADE2', '#F6F0E2', '#E9483B'].forEach((c, k) => { const x = 200 + k * 150, y = 336 + 30 * Math.sin((k / 4) * Math.PI) + Math.sin(t * 2 + k) * 3; G.rrect(ctx, x, y, 60, 70 + (k % 2) * 24, 5, { fill: c, lw: 3, seed: 451 + k }); });
-    // a lantern (فانوس) hanging from a balcony
+    // a lantern (fanoos) hanging from a balcony
     const lx = 560, ly = 440 + Math.sin(t * 1.6) * 4;
     G.line(ctx, [[lx, 380], [lx, ly - 40]], { color: INK, lw: 2.5, seed: 460 });
     G.poly(ctx, [[lx - 26, ly - 40], [lx + 26, ly - 40], [lx + 34, ly + 30], [lx, ly + 60], [lx - 34, ly + 30]], { fill: '#F2C94C', lw: 3.5, seed: 461, step: 14 });
@@ -114,7 +114,7 @@
     doorPanel(ctx, DX, DOORY, DOORW, GY - DOORY, doorOpen);
     G.rrect(ctx, DX - 30, GY - 14, 230, 22, 4, { fill: '#B9A58A', lw: 3, seed: 575 }); // the step
     G.rrect(ctx, DX + 5, 360, 170, 48, 8, { fill: '#F6F0E2', lw: 3.5, seed: 576 });
-    AR(ctx, 'عم فتحي', DX + 90, 395, { size: 30, color: '#7A3B22', boil: 0.4 });
+    AR(ctx, 'Uncle Fathy', DX + 90, 395, { size: 32, color: '#7A3B22', boil: 0.4 });
     // the ground: stone tiles
     G.rrect(ctx, -60, GY, W + 120, H - GY + 60, 0, { fill: '#D9C3A0', lw: 4, seed: 590, hatch: { color: 'rgba(110,80,40,0.12)', gap: 16 } });
     for (let k = 0; k < 9; k++) G.line(ctx, [[k * 240 - 40, GY + 10], [k * 240 - 120, H + 20]], { color: 'rgba(110,80,40,0.25)', lw: 2.5, seed: 595 + k });
@@ -124,7 +124,7 @@
 
   // ---------- keepy-uppy ----------
   const YX = 760, YS = 0.78; // Yasin's spot in the street
-  const footPos = (i) => [YX + (i % 2 ? 1 : -1) * 46 * YS, GY - 50 * YS];
+  const footPos = (i) => [YX + (i % 2 ? 1 : -1) * 95 * YS, GY - 50 * YS];
   function ballState(t) {
     const tc = S.touches;
     if (t < tc[0]) return { x: footPos(0)[0] - 30, y: GY - 24, spin: 0 }; // resting on the ground
@@ -132,7 +132,7 @@
       const a = tc[i], b = i + 1 < tc.length ? tc[i + 1] : ev.kick;
       if (t < b) {
         const u = (t - a) / (b - a), p0 = footPos(i), p1 = i + 1 < tc.length ? footPos(i + 1) : [YX + 40, GY - 60];
-        const hgt = i + 1 < tc.length ? 230 : 460;
+        const hgt = i + 1 < tc.length ? 150 : 460;
         return { x: lerp(p0[0], p1[0], u), y: lerp(p0[1], p1[1], u) - hgt * 4 * u * (1 - u) - 30, spin: (i + u) * 2.4, i };
       }
     }
@@ -157,14 +157,14 @@
     const bounce = sungT.reduce((a, st) => a + (t >= st ? Math.exp(-(t - st) * 10) * Math.sin(Math.min(Math.PI, (t - st) * 20)) : 0), 0);
     const p0 = pop(t, end ? ev.end : 0.05, 0.45, 2);
     ctx.save(); ctx.translate(960, end ? 300 : 380); ctx.scale(p0 * (1 + bounce * 0.06), p0 * (1 - bounce * 0.04)); ctx.rotate(Math.sin(t * 1.5) * 0.015);
-    AR(ctx, end ? 'وتوتة توتة' : 'حواديت توتة', 0, 40, { size: end ? 170 : 210, color: '#FF6B4A', stroke: INK, strokeW: 16 });
+    AR(ctx, end ? 'TOTA, TOTA!' : 'TOTA TALES', 0, 40, { fam: 'Bungee', weight: 400, size: end ? 150 : 170, color: '#FF6B4A', stroke: INK, strokeW: 16 });
     ctx.restore();
     if (!end) {
       const p1 = pop(t, T(1, 2), 0.4);
       if (p1 > 0) {
         ctx.save(); ctx.translate(960, 600); ctx.scale(p1, p1);
         G.rrect(ctx, -400, -70, 800, 120, 30, { fill: '#FFFFFF', lw: 5, seed: 30 });
-        AR(ctx, 'الحلقة ١ : ياسين والشباك', 0, 18, { size: 62, color: '#2B4C7E' });
+        AR(ctx, 'Episode 1: Yasin and the Window', 0, 18, { size: 64, color: '#2B4C7E' });
         ctx.restore();
       }
       Ch.person(ctx, { x: 300, y: 1010, s: 0.9, pose: 'stand', style: CAST.yasin, gesture: 'wave', mouth: 'grin', eyes: 'happy', seed: 900 });
@@ -172,20 +172,20 @@
       Ch.cat(ctx, { x: 1640, y: 1000, s: 1.1, t, look: -0.6, happy: 1, seed: 740 });
     } else {
       const p2 = pop(t, T(32), 0.4);
-      if (p2 > 0) { ctx.save(); ctx.translate(960, 500); ctx.scale(p2, p2); AR(ctx, 'خلصت الحدوتة!', 0, 0, { size: 110, color: '#FFFFFF', stroke: INK, strokeW: 12 }); ctx.restore(); }
+      if (p2 > 0) { ctx.save(); ctx.translate(960, 500); ctx.scale(p2, p2); AR(ctx, 'Our story is done!', 0, 0, { size: 110, color: '#FFFFFF', stroke: INK, strokeW: 12 }); ctx.restore(); }
       const p3 = pop(t, ev.sub, 0.4, 3);
       if (p3 > 0) {
         ctx.save(); ctx.translate(960, 690); ctx.scale(p3, p3);
-        G.rrect(ctx, -250, -62, 500, 124, 62, { fill: '#E63B2E', lw: 5, seed: 50 });
-        AR(ctx, 'اشترك', 40, 24, { size: 70, color: '#FFFFFF' });
+        G.rrect(ctx, -310, -62, 620, 124, 62, { fill: '#E63B2E', lw: 5, seed: 50 });
+        AR(ctx, 'SUBSCRIBE', 50, 22, { fam: 'Bungee', weight: 400, size: 54, color: '#FFFFFF' });
         const sw = Math.sin((t - ev.sub) * 14) * Math.exp(-(t - ev.sub) * 2) * 0.5;
-        ctx.save(); ctx.translate(-140, 0); ctx.rotate(sw);
+        ctx.save(); ctx.translate(-225, 0); ctx.rotate(sw);
         G.poly(ctx, [[-30, 26], [-24, -14], [0, -34], [24, -14], [30, 26]], { fill: '#FFD45A', lw: 4, seed: 51, step: 12 });
         G.ellipse(ctx, 0, 32, 9, 9, { fill: '#FFD45A', lw: 3, seed: 52 });
         ctx.restore();
         ctx.restore();
         const p4 = pop(t, T(33, 2), 0.4);
-        if (p4 > 0) { ctx.save(); ctx.translate(960, 850); ctx.scale(p4, p4); AR(ctx, 'واستنونا في حدوتة جديدة!', 0, 0, { size: 56, color: '#2B4C7E', stroke: '#FFFFFF', strokeW: 8 }); ctx.restore(); }
+        if (p4 > 0) { ctx.save(); ctx.translate(960, 850); ctx.scale(p4, p4); AR(ctx, 'See you in the next story!', 0, 0, { size: 60, color: '#2B4C7E', stroke: '#FFFFFF', strokeW: 8 }); ctx.restore(); }
       }
       Ch.person(ctx, { x: 260, y: 1020, s: 0.85, pose: 'stand', style: CAST.yasin, gesture: 'wave', mouth: 'grin', eyes: 'happy', seed: 900 });
       Ch.person(ctx, { x: 1640, y: 1030, s: 1.0, pose: 'stand', style: CAST.fathy, gesture: 'wave', mouth: 'grin', eyes: 'happy', seed: 950 });
@@ -220,7 +220,7 @@
     ball(ctx, 1000 + a * 1800, 520 - a * 700, 120, a * 14, sq);
     const p = pop(t, ev.kick, 0.16, 2.6);
     ctx.save(); ctx.translate(1330, 280); ctx.rotate(-0.1); ctx.scale(p, p);
-    AR(ctx, 'شووووط!', 0, 0, { size: 170, color: '#E9483B', stroke: INK, strokeW: 16 });
+    AR(ctx, 'KICK!', 0, 0, { fam: 'Bungee', weight: 400, size: 170, color: '#E9483B', stroke: INK, strokeW: 16 });
     ctx.restore();
   }
   // the ball flies at the window, which breaks
@@ -244,7 +244,7 @@
       const p = pop(t, ev.crash, 0.18, 3);
       ctx.save(); ctx.translate(wx, wy - 250); ctx.rotate(0.08); ctx.scale(p, p);
       G.star(ctx, 0, 0, 170, { fill: '#FFF3A8', seed: 90 });
-      AR(ctx, 'طاااخ!', 0, 30, { size: 96, color: '#E9483B', stroke: INK, strokeW: 12 });
+      AR(ctx, 'CRASH!', 0, 30, { fam: 'Bungee', weight: 400, size: 76, color: '#E9483B', stroke: INK, strokeW: 12 });
       ctx.restore();
       if (a < 0.2) { ctx.save(); ctx.globalAlpha = 1 - a / 0.2; ctx.fillStyle = '#FFFFFF'; ctx.fillRect(-W, -H, W * 3, H * 3); ctx.restore(); }
     }
@@ -255,7 +255,7 @@
     G.rays(ctx, 960, 420, { n: 22, r0: 200, r1: 1400, color: 'rgba(255,255,255,0.5)', lw: 18, seed: 5, spin: t * 0.1 });
     const shake = Math.sin(t * 60) * 3;
     Ch.person(ctx, { x: 960 + shake, y: 1560, s: 2.3, pose: 'stand', style: CAST.yasin, handL: [-80, -540], handR: [80, -540], eyes: 'wide', brows: 'worried', mouth: 'o', sweat: 1, seed: 900 });
-    for (let k = 0; k < 3; k++) AR(ctx, '!', 1300 + k * 80, 300 - k * 30, { size: 140 + k * 20, color: '#E9483B', stroke: INK, strokeW: 10 });
+    for (let k = 0; k < 3; k++) AR(ctx, '!', 1300 + k * 80, 300 - k * 30, { fam: 'Bungee', weight: 400, size: 140 + k * 20, color: '#E9483B', stroke: INK, strokeW: 10 });
   }
   // hiding behind the wall corner, with a thought bubble
   function hide(ctx, t) {
@@ -267,14 +267,14 @@
     Ch.person(ctx, { x: 520 + peek * 70, y: 1000, s: 1.05, pose: 'stand', style: CAST.yasin, gesture: 'think', eyes: 'normal', look: 1, brows: 'worried', mouth: 'wavy', sweat: 0.8, blink: blinkAt(t, 2), seed: 900 });
     G.rrect(ctx, -40, 120, 560, 1000, 6, { fill: '#F2C57C', lw: 5, seed: 730, hatch: { color: 'rgba(120,70,20,0.12)', gap: 12 } });
     for (let k = 0; k < 6; k++) G.line(ctx, [[-40, 260 + k * 140], [520, 260 + k * 140]], { color: 'rgba(120,70,20,0.3)', lw: 3, seed: 740 + k });
-    // the thought «محدش شافني... أستخبى؟» (said in his heart, so it is a thought bubble, not lips)
+    // the thought "Nobody saw me... should I hide?" (said in his heart, so it is a thought bubble, not lips)
     const l = S.vo.find((q) => q.id === 'hide');
     if (t >= l.at - 0.3) {
       const p = pop(t, l.at - 0.3, 0.35);
       ctx.save(); ctx.translate(1060, 250); ctx.scale(p, p);
       for (const [dx, dy, r] of [[-330, 170, 22], [-280, 120, 32]]) G.ellipse(ctx, dx, dy, r, r, { fill: '#FFFFFF', lw: 4, seed: 750 + r });
       G.ellipse(ctx, 0, 0, 360, 130, { fill: '#FFFFFF', lw: 4, seed: 770 });
-      AR(ctx, 'محدش شافني... أستخبى؟', 0, 20, { size: 60, color: INK });
+      AR(ctx, 'Nobody saw me... should I hide?', 0, 20, { size: 60, color: INK });
       ctx.restore();
     }
   }
@@ -295,8 +295,8 @@
       const q = pop(t, T(15, 2), 0.35);
       if (q > 0) {
         ctx.save(); ctx.translate(190, -40); ctx.scale(q, q);
-        AR(ctx, 'الصراحة', 0, -10, { size: 96, color: '#D9435F' });
-        AR(ctx, 'دايماً أحلى', 0, 110, { size: 84, color: '#2B4C7E' });
+        AR(ctx, 'Honesty', 0, -10, { size: 110, color: '#D9435F' });
+        AR(ctx, 'is always best', 0, 100, { size: 84, color: '#2B4C7E' });
         ctx.restore();
       }
       ctx.restore();
@@ -323,8 +323,8 @@
     const ym = mouthOf('yasin', t);
     const happy = t >= T(23, 2);
     Ch.person(ctx, { x, y: GY, s: 0.8, pose, walk, style: CAST.yasin, handR, eyes: happy ? 'happy' : 'normal', lookY: ym ? 0.4 : -0.3, look: 0.8, brows: happy ? 'neutral' : t >= ev.door ? 'worried' : 'neutral', mouth: ym || (happy ? 'grin' : 'wavy'), blush: happy ? 0.8 : 0, blink: blinkAt(t, 1), seed: 900 });
-    // «طق طق طق»
-    ev.knock.forEach((k, i) => { const p = pop(t, k, 0.15, 3); if (p > 0 && t < ev.open + 0.3) { ctx.save(); ctx.translate(DX + 100 + i * 60, 540 - i * 55); ctx.rotate(-0.15 + i * 0.12); ctx.scale(p, p); AR(ctx, 'طق!', 0, 0, { size: 64, color: '#E9483B', stroke: '#FFFFFF', strokeW: 10 }); ctx.restore(); } });
+    // knock knock knock
+    ev.knock.forEach((k, i) => { const p = pop(t, k, 0.15, 3); if (p > 0 && t < ev.open + 0.3) { ctx.save(); ctx.translate(DX + 100 + i * 60, 540 - i * 55); ctx.rotate(-0.15 + i * 0.12); ctx.scale(p, p); AR(ctx, 'KNOCK!', 0, 0, { fam: 'Bungee', weight: 400, size: 44, color: '#E9483B', stroke: '#FFFFFF', strokeW: 10 }); ctx.restore(); } });
     if (smiling && out < 1) { const a = t - ev.smile - 0.6; G.star(ctx, DX + 150, 600, 22 + 8 * Math.sin(a * 8), { fill: '#FFF3A8', seed: 880, rot: a }); }
     if (happy) for (let k = 0; k < 5; k++) { const a = t - T(23, 2) - k * 0.4; if (a < 0) continue; G.heart(ctx, x - 120 + k * 30 + Math.sin(a * 3 + k) * 20, 470 - a * 90, 1.5, { fill: '#E95A78', seed: 890 + k }); }
   }
@@ -346,8 +346,8 @@
     G.rrect(ctx, -8, -10, 16, 120, 6, { fill: '#8A5A3B', lw: 3.5, seed: 1030 });
     G.rrect(ctx, -34, -40, 68, 36, 6, { fill: '#9AA3AD', lw: 3.5, seed: 1031 });
     ctx.restore();
-    S.taps.forEach((k, i) => { if (t >= k && t < k + 0.3) { ctx.save(); ctx.globalAlpha = 1 - (t - k) / 0.3; AR(ctx, 'طُق', 640, 300 + (i % 3) * 130, { size: 50, color: INK }); ctx.restore(); } });
-    if (done) { const p = pop(t, T(26), 0.3, 3); ctx.save(); ctx.translate(960, 150); ctx.scale(p, p); AR(ctx, 'زي الفُل!', 0, 0, { size: 90, color: '#2E8B57', stroke: '#FFFFFF', strokeW: 10 }); ctx.restore(); }
+    S.taps.forEach((k, i) => { if (t >= k && t < k + 0.3) { ctx.save(); ctx.globalAlpha = 1 - (t - k) / 0.3; AR(ctx, 'tap!', 640, 300 + (i % 3) * 130, { size: 54, color: INK }); ctx.restore(); } });
+    if (done) { const p = pop(t, T(26), 0.3, 3); ctx.save(); ctx.translate(960, 150); ctx.scale(p, p); AR(ctx, 'Good as new!', 0, 0, { size: 96, color: '#2E8B57', stroke: '#FFFFFF', strokeW: 10 }); ctx.restore(); }
   }
   // playing together: a pass on every beat
   function play(ctx, t) {
@@ -370,13 +370,13 @@
     G.hatch(ctx, [-W, -H, W * 2, H * 2], { color: 'rgba(200,150,60,0.08)', gap: 18 });
     G.rrect(ctx, 120, 70, W - 240, H - 210, 40, { fill: null, lw: 8, seed: 1100, color: '#F2B84B' });
     for (let k = 0; k < 8; k++) G.star(ctx, 160 + (k % 4) * ((W - 320) / 3), k < 4 ? 110 : H - 180, 22, { fill: '#F2B84B', seed: 1110 + k, rot: t * 0.5 + k });
-    const lines = [['الشاطر مش اللي', '#2B4C7E', 250], ['ما بيغلطش...', '#2B4C7E', 400], ['الشاطر اللي', '#E9483B', 580], ['يعترف بغلطه!', '#E9483B', 740]];
+    const lines = [['Everyone makes', '#2B4C7E', 260], ['mistakes...', '#2B4C7E', 410], ['but brave kids', '#E9483B', 590], ['tell the truth!', '#E9483B', 750]];
     lines.forEach(([txt, col, y], i) => {
       const st = S.moralStamps[i];
       if (t < st) return;
       const p = ease.outBack(clamp((t - st) / 0.18), 3);
       ctx.save(); ctx.translate(960, y); ctx.scale(lerp(1.6, 1, p), lerp(1.6, 1, p)); ctx.globalAlpha = 1;
-      AR(ctx, txt, 0, 0, { size: 120, color: col, stroke: '#FFFFFF', strokeW: 10 });
+      AR(ctx, txt, 0, 0, { size: 130, color: col, stroke: '#FFFFFF', strokeW: 10 });
       ctx.restore();
     });
     Ch.person(ctx, { x: 270, y: 1010, s: 0.62, pose: 'stand', style: CAST.yasin, gesture: t >= S.moralStamps[3] ? 'thumbsUp' : null, eyes: 'happy', mouth: 'grin', seed: 900 });
@@ -406,11 +406,14 @@
     vo.lines.forEach((l, li) => {
       if (['title', 'hide', 'moral', 'tota'].includes(S.vo[li] && S.vo[li].id)) return;
       const ws = l.words; if (!ws.length) return;
-      const n = Math.ceil(ws.length / 6), per = Math.ceil(ws.length / n);
+      // show the words with their punctuation (the timings strip it) when the counts line up
+      const raw = l.text.split(/\s+/).filter(Boolean);
+      const word = (w, i) => (raw.length === ws.length ? raw[i] : w.w);
+      const n = Math.ceil(ws.length / 7), per = Math.ceil(ws.length / n);
       for (let k = 0; k * per < ws.length; k++) {
         const g = ws.slice(k * per, (k + 1) * per);
         const next = ws[(k + 1) * per];
-        out.push({ t: g[0].t - 0.05, end: next ? next.t - 0.05 : l.end + 0.2, text: g.map((w) => w.w).join(' ') });
+        out.push({ t: g[0].t - 0.05, end: next ? next.t - 0.05 : l.end + 0.2, text: g.map((w, j) => word(w, k * per + j)).join(' ') });
       }
     });
     return out;
@@ -418,7 +421,7 @@
   function drawSubs(ctx, t) {
     const c = SUBS.find((s) => t >= s.t && t < s.end);
     if (!c) return;
-    const size = 54, w = G.measure(ctx, c.text, size, 'Noto Naskh Arabic', 700, 'ar') + 70, y = SAFE.y + SAFE.h - 40;
+    const size = 66, w = G.measure(ctx, c.text, size, 'Patrick Hand', 400) + 70, y = SAFE.y + SAFE.h - 40;
     const a = clamp((t - c.t) / 0.12) * clamp((c.end - t) / 0.12);
     ctx.save(); ctx.globalAlpha = a;
     ctx.fillStyle = 'rgba(25,20,35,0.62)';
