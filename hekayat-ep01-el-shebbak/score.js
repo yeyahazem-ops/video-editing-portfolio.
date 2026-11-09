@@ -68,6 +68,18 @@
   // the moral card: the words stamp in, one group per beat
   const moralStamps = [T(28, 2), T(29), T(29, 2), T(30)];
 
+  // ---------- extra animation hits (each one has a sound in song.js) ----------
+  // the title letters drop in one by one on 16th notes (a pop each), the same at the ending
+  const TITLE = 'TOTA TALES', END_TITLE = 'TOTA, TOTA!';
+  const dropTimes = (str, t0) => { const out = []; let k = 0; for (const ch of str) { out.push(ch === ' ' ? null : t0 + k * BEAT / 4); if (ch !== ' ') k++; } return out; };
+  const letters = dropTimes(TITLE, T(0, 0.25));
+  const endLetters = dropTimes(END_TITLE, ev.end + 0.05);
+  const whoosh = { flight: T(9, 1.5), shock: T(11) }; // the ball flies off · the dramatic zoom on Yasin
+  const jump = T(16); // Yasin decides: a jump with a boing
+  const love = T(7); // "loved football more than anything": hearts burst around him
+  const sparkle = T(26); // "Good as new!"
+  const hug = T(23, 2); // uncle's hand on his shoulder: hearts
+
   // ---------- the voice (ElevenLabs, pre-rendered into out/.vo-cache by tools/eleven.js) ----------
   const NARR = 'JBFqnCBsd6RMkjVDRZzb', KID = 'cgSgspJ2msm6clMCkdW9', OLD = 'pqHfZKP75CvOlQylNhV4';
   const V = (id, at, who, voice, text) => ({ id, at, who, voice, text });
@@ -99,6 +111,6 @@
     sub: ev.sub,
   };
 
-  const SCORE = { FPS, FORMAT, W, H, SAFE, DURATION, clock, T, BEAT, S, m, chords, chordAt, ev, vo, hook, sung, sungAt, touches, touchNotes, passes, taps, moralStamps, markers };
+  const SCORE = { FPS, FORMAT, W, H, SAFE, DURATION, clock, T, BEAT, S, m, chords, chordAt, ev, vo, hook, sung, sungAt, touches, touchNotes, passes, taps, moralStamps, TITLE, END_TITLE, letters, endLetters, whoosh, jump, love, sparkle, hug, markers };
   if (node) module.exports = SCORE; else globalThis.SCORE = SCORE;
 })();

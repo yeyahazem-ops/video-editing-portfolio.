@@ -129,6 +129,23 @@ for (const n of [m('F4'), m('A4'), m('C5'), m('F5')]) { lead.addMono(I.marimba(n
 drums.addMono(I.kick({ punch: 0.8 }), T(34), 0.5);
 drums.addMono(I.crash(2), T(34), 0.18);
 
+// ---------- the new animation hits ----------
+// each title letter lands with a pop, climbing the F major scale
+const scale = [m('F5'), m('G5'), m('A5'), m('Bb5'), m('C6'), m('D6'), m('E6'), m('F6'), m('G6'), m('A6')];
+sc.letters.filter((x) => x !== null).forEach((t, i) => { fx.addMono(I.pop(1400 + i * 120, 70 + i), t + 0.22, 0.25); lead.addMono(I.marimba(scale[i % scale.length], { thock: 0.1 }), t + 0.22, 0.07); });
+sc.endLetters.filter((x) => x !== null).forEach((t, i) => { fx.addMono(I.pop(1400 + i * 110, 90 + i), t + 0.22, 0.22); lead.addMono(I.marimba(scale[i % scale.length], { thock: 0.1 }), t + 0.22, 0.06); });
+// the ball takes off for the window, and the dramatic zoom
+fx.addMono(I.launchWhistle(ev.crash - sc.whoosh.flight - 0.15, 31), sc.whoosh.flight, 0.12);
+fx.addMono(I.noiseSweep(0.35, 600, 5000, { q: 1.5, pink: true }), sc.whoosh.shock - 0.05, 0.18);
+fx.addMono(I.subBoom(0.4, 120, 60), sc.whoosh.shock, 0.25);
+// the decision jump
+fx.addMono(I.boing(), sc.jump, 0.22);
+fx.addMono(I.thud(120, 0.08), sc.jump + 0.5, 0.35);
+// the hug: a little harp of bells
+[m('C6'), m('E6'), m('G6'), m('C7')].forEach((n, i) => fx.addMono(I.bell(440 * Math.pow(2, (n - 69) / 12), 0.6, 1.2), sc.hug + i * 0.06, 0.06));
+// "Good as new!": a sparkle run
+for (let i = 0; i < 8; i++) fx.addMono(I.bell(1046 * Math.pow(2, [0, 4, 7, 12, 16, 19, 24, 28][i] / 12), 0.5, 1.1), sc.sparkle + i * 0.04, 0.05, (i % 2 ? 0.3 : -0.3));
+
 // ---------- the voice ----------
 const vo = Voice.speak(sc.vo, { engine: 'none', out: path.join(__dirname, 'out'), length: N / SR });
 // ---------- mix ----------
