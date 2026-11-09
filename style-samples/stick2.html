@@ -1,0 +1,124 @@
+<!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0;background:#000}canvas{display:block}</style></head><body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script>
+// Stick-figure laugh loop, matched to the reference: big round heads tipped back, huge open mouths
+// with teeth and tongue, squeezed-shut eyes spraying tears sideways, tees, long stick legs with bent
+// knees, hands on the belly, shake lines. Yasin wears a backwards red cap; Uncle Fathy is bald with
+// round glasses and a moustache.
+const W = 1080, H = 1920, cv = document.getElementById('c'), ctx = cv.getContext('2d');
+const INK = '#151515', TAU = Math.PI * 2;
+const lerp = (a, b, t) => a + (b - a) * t;
+const rot = ([x, y], a) => [x * Math.cos(a) - y * Math.sin(a), x * Math.sin(a) + y * Math.cos(a)];
+const shade = (hex, k) => { const n = parseInt(hex.slice(1), 16); const f = (v) => Math.round(Math.max(0, Math.min(255, v * k))); return `rgb(${f(n >> 16)},${f((n >> 8) & 255)},${f(n & 255)})`; };
+const stroke = (lw = 8, col = INK) => { ctx.lineWidth = lw; ctx.strokeStyle = col; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.stroke(); };
+const line = (pts, lw = 11) => { ctx.beginPath(); pts.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y))); stroke(lw); };
+const curve = (a, c, b, lw = 11) => { ctx.beginPath(); ctx.moveTo(...a); ctx.quadraticCurveTo(...c, ...b); stroke(lw); };
+
+function tearDrop(x, y, ang, s) { ctx.save(); ctx.translate(x, y); ctx.rotate(ang); ctx.beginPath(); ctx.moveTo(-22 * s, 0); ctx.quadraticCurveTo(-4 * s, -13 * s, 14 * s, -9 * s); ctx.arc(14 * s, 0, 9 * s, -Math.PI / 2, Math.PI / 2); ctx.quadraticCurveTo(-4 * s, 13 * s, -22 * s, 0); ctx.fillStyle = '#9AD8F5'; ctx.fill(); stroke(3.5, '#3C7FA6'); ctx.fillStyle = 'rgba(255,255,255,0.8)'; ctx.beginPath(); ctx.ellipse(12 * s, -3 * s, 3 * s, 2 * s, 0, 0, TAU); ctx.fill(); ctx.restore(); }
+
+// one character. All body parts in the character's own frame: origin at the hips, y up negative.
+function guy(o, t) {
+  const ph = o.phase;
+  const shake = Math.abs(Math.sin(TAU * 4.4 * t + ph));             // the laugh: fast up-down jolts
+  const sway = Math.sin(TAU * 1.1 * t + ph);                         // slower rock back and forth
+  const hipX = o.x + sway * 10, hipY = o.groundY - o.legLen + 28 * (1 - shake) + 6;
+  const lean = o.lean + 0.05 * sway;                                 // leaning back from laughing
+  const headTilt = o.headTilt + 0.07 * Math.sin(TAU * 2.2 * t + ph);
+  const S = o.s;
+  const P = (p) => { const r = rot([p[0] * S, p[1] * S * (1 - 0.025 * (1 - shake))], lean); return [hipX + r[0], hipY + r[1]]; };
+
+  // ---- legs: hips → bent knees (outward, deeper when the body drops) → feet planted on the ground
+  for (const sd of [-1, 1]) {
+    const hip = P([sd * 38, -6]), foot = [o.x + sd * o.stance + (o.footShift || 0), o.groundY];
+    const mid = [(hip[0] + foot[0]) / 2, (hip[1] + foot[1]) / 2];
+    const bend = (sd === o.frontLeg ? 120 : 60) + 34 * (1 - shake);
+    const knee = [mid[0] + sd * bend * S, mid[1] - 30 * S];
+    ctx.beginPath(); ctx.moveTo(...hip); ctx.quadraticCurveTo(knee[0], knee[1], foot[0], foot[1] - 12); stroke(11 * S);
+    ctx.save(); ctx.translate(foot[0] + sd * 24 * S, foot[1] - 6); ctx.rotate(sd * 0.12); ctx.beginPath(); ctx.ellipse(0, 0, 50 * S, 18 * S, 0, 0, TAU); ctx.fillStyle = INK; ctx.fill(); ctx.restore();
+    // shake lines beside the knees
+    if (Math.sin(TAU * 4.4 * t + ph + sd) > -0.2) for (let k = 0; k < 2; k++) { const c = [knee[0] + sd * (52 + k * 22) * S, knee[1] + (k * 30 - 10) * S]; ctx.beginPath(); ctx.arc(c[0], c[1], 22 * S, sd > 0 ? -0.8 : Math.PI - 0.8, sd > 0 ? 0.8 : Math.PI + 0.8); stroke(4.5 * S); }
+  }
+
+  // ---- the tee (long, to mid-thigh), with short sleeves and one darker side
+  const top = -360, hem = 40;
+  const tee = [[-62, top], [-118, top + 22], [-160, top + 110], [-118, top + 138], [-104, top + 112], [-100, hem], [100, hem], [104, top + 112], [118, top + 138], [160, top + 110], [118, top + 22], [62, top], [30, top + 22], [-30, top + 22]].map(([x, y]) => P([x * 0.8, y]));
+  ctx.beginPath(); tee.forEach((p, i) => (i ? ctx.lineTo(...p) : ctx.moveTo(...p))); ctx.closePath(); ctx.fillStyle = o.shirt; ctx.fill();
+  ctx.save(); ctx.clip();
+  ctx.beginPath(); [[40, top], [200, top], [200, hem + 10], [55, hem + 10]].map(P).forEach((p, i) => (i ? ctx.lineTo(...p) : ctx.moveTo(...p))); ctx.fillStyle = shade(o.shirt, 0.86); ctx.fill();
+  // two soft folds
+  ctx.globalAlpha = 0.35; line([P([-60, top + 160]), P([-30, top + 240])], 4); line([P([20, hem - 60]), P([50, hem - 10])], 4); ctx.globalAlpha = 1;
+  ctx.restore();
+  ctx.beginPath(); tee.forEach((p, i) => (i ? ctx.lineTo(...p) : ctx.moveTo(...p))); ctx.closePath(); stroke(7 * S);
+  if (o.number) { const c = P([0, top + 190]); ctx.save(); ctx.translate(...c); ctx.rotate(lean); ctx.font = `900 ${70 * S}px "Arial Black", Arial`; ctx.textAlign = 'center'; ctx.lineWidth = 7; ctx.strokeStyle = INK; ctx.strokeText(o.number, 0, 0); ctx.fillStyle = '#fff'; ctx.fillText(o.number, 0, 0); ctx.restore(); }
+
+  // ---- arms: out of the sleeves, elbows bent, fists jiggling on the belly / at the side
+  const jig = Math.sin(TAU * 8.8 * t + ph) * 7;
+  for (const a of o.arms) {
+    const sh = P([a.from[0] * 0.8, a.from[1]]), el = P(a.elbow), hd = P([a.hand[0] + jig * 0.6, a.hand[1] + jig]);
+    ctx.beginPath(); ctx.moveTo(...sh); ctx.quadraticCurveTo(el[0], el[1], hd[0], hd[1]); stroke(11 * S);
+    ctx.save(); ctx.translate(...hd); ctx.rotate(lean + (a.fistRot || 0)); ctx.beginPath(); ctx.ellipse(0, 0, 25 * S, 20 * S, 0, 0, TAU); ctx.fillStyle = INK; ctx.fill(); ctx.restore();
+    if (a.lines) { const sd = Math.sign(a.hand[0]) || 1; for (let k = 0; k < 2; k++) { const c = [hd[0] + sd * (48 + k * 20) * S, hd[1] - 6 + k * 10]; ctx.beginPath(); ctx.arc(c[0], c[1], 20 * S, sd > 0 ? -0.8 : Math.PI - 0.8, sd > 0 ? 0.8 : Math.PI + 0.8); stroke(4.5 * S); } }
+  }
+
+  // ---- the head: tipped back, big laugh
+  const neck = P([0, top + 10]);
+  const hc = [neck[0] + Math.sin(lean + headTilt) * 175 * S, neck[1] - Math.cos(lean + headTilt) * 175 * S];
+  const R = 172 * S;
+  ctx.save(); ctx.translate(...hc); ctx.rotate(lean + headTilt);
+  if (o.cap) { // the back part of a backwards cap sits behind the head: the brim sticks out to one side
+    ctx.save(); ctx.rotate(-0.35); ctx.beginPath(); ctx.ellipse(-R * 1.02, -R * 0.5, R * 0.62, R * 0.24, -0.35, 0, TAU); ctx.fillStyle = '#D9342B'; ctx.fill(); stroke(7 * S); ctx.restore();
+  }
+  const hg = ctx.createRadialGradient(-R * 0.35, -R * 0.4, R * 0.2, 0, 0, R * 1.05); hg.addColorStop(0, '#FFFFFF'); hg.addColorStop(0.7, '#F1F1EF'); hg.addColorStop(1, '#D5D5D2');
+  ctx.beginPath(); ctx.ellipse(0, 0, R, R * 0.97, 0, 0, TAU); ctx.fillStyle = hg; ctx.fill(); stroke(8 * S);
+  if (o.cap) { // the crown of the cap over the top of the head, with its button
+    ctx.save(); ctx.beginPath(); ctx.ellipse(0, 0, R, R * 0.97, 0, 0, TAU); ctx.clip();
+    ctx.beginPath(); ctx.ellipse(-R * 0.1, -R * 0.62, R * 1.05, R * 0.62, -0.18, Math.PI, TAU); ctx.lineTo(R, -R * 0.35); ctx.quadraticCurveTo(0, -R * 0.12, -R * 1.05, -R * 0.42); ctx.closePath(); ctx.fillStyle = '#E2453A'; ctx.fill(); stroke(7 * S);
+    ctx.globalAlpha = 0.3; line([[-R * 0.15, -R * 1.0], [-R * 0.25, -R * 0.35]], 4); line([[R * 0.45, -R * 0.95], [R * 0.4, -R * 0.36]], 4); ctx.globalAlpha = 1;
+    ctx.restore();
+    ctx.beginPath(); ctx.ellipse(0, 0, R, R * 0.97, 0, Math.PI * 1.05, Math.PI * 1.95); stroke(8 * S);
+    // the strap opening at the front
+    ctx.beginPath(); ctx.ellipse(R * 0.05, -R * 0.42, R * 0.2, R * 0.09, 0, 0, TAU); ctx.fillStyle = '#F4F1EA'; ctx.fill(); stroke(5 * S);
+  }
+  if (o.bald) { for (const sd of [-1, 1]) { ctx.beginPath(); ctx.ellipse(sd * R * 0.96, R * 0.02, R * 0.13, R * 0.3, 0, 0, TAU); ctx.fillStyle = '#E3E1DB'; ctx.fill(); stroke(5 * S); } }
+  // squeezed-shut eyes: a thick bent line, a crease under it
+  for (const sd of [-1, 1]) {
+    ctx.beginPath(); ctx.moveTo(sd * R * 0.14, -R * 0.2); ctx.quadraticCurveTo(sd * R * 0.36, -R * 0.52, sd * R * 0.66, -R * 0.26); stroke(12 * S);
+    ctx.beginPath(); ctx.moveTo(sd * R * 0.2, -R * 0.12); ctx.quadraticCurveTo(sd * R * 0.4, -R * 0.2, sd * R * 0.58, -R * 0.12); stroke(5 * S);
+    for (const k of [-1, 0, 1]) { ctx.beginPath(); ctx.moveTo(sd * R * 0.7, -R * 0.26 + k * R * 0.08); ctx.lineTo(sd * R * 0.8, -R * 0.28 + k * R * 0.13); stroke(4 * S); }
+    if (o.glasses) { ctx.beginPath(); ctx.arc(sd * R * 0.4, -R * 0.26, R * 0.3, 0, TAU); stroke(6 * S); }
+  }
+  if (o.glasses) curve([-R * 0.1, -R * 0.3], [0, -R * 0.36], [R * 0.1, -R * 0.3], 6 * S);
+  // the huge open mouth: dark inside, a row of top teeth, a red tongue
+  const mouth = () => { ctx.beginPath(); ctx.moveTo(-R * 0.66, -R * 0.02); ctx.quadraticCurveTo(0, R * 0.1, R * 0.66, -R * 0.02); ctx.bezierCurveTo(R * 0.62, R * 0.62, R * 0.26, R * 0.84, 0, R * 0.84); ctx.bezierCurveTo(-R * 0.26, R * 0.84, -R * 0.62, R * 0.62, -R * 0.66, -R * 0.02); ctx.closePath(); };
+  mouth(); ctx.fillStyle = '#3B1212'; ctx.fill();
+  ctx.save(); mouth(); ctx.clip();
+  ctx.fillStyle = '#FFFFFF'; ctx.beginPath(); ctx.moveTo(-R * 0.7, -R * 0.06); ctx.quadraticCurveTo(0, R * 0.08, R * 0.7, -R * 0.06); ctx.lineTo(R * 0.7, R * 0.12); ctx.quadraticCurveTo(0, R * 0.26, -R * 0.7, R * 0.12); ctx.fill();
+  ctx.globalAlpha = 0.25; line([[-R * 0.6, R * 0.15], [R * 0.6, R * 0.15]], 3); ctx.globalAlpha = 1;
+  ctx.fillStyle = '#E2505A'; ctx.beginPath(); ctx.ellipse(R * 0.05, R * 0.82, R * 0.36, R * 0.24, 0, 0, TAU); ctx.fill();
+  ctx.fillStyle = '#C23A44'; ctx.beginPath(); ctx.ellipse(R * 0.05, R * 0.86, R * 0.06, R * 0.14, 0, 0, TAU); ctx.fill();
+  ctx.restore();
+  mouth(); stroke(8 * S);
+  if (o.mustache) { for (const sd of [-1, 1]) { ctx.beginPath(); ctx.ellipse(sd * R * 0.24, -R * 0.06, R * 0.28, R * 0.1, sd * -0.18, 0, TAU); ctx.fillStyle = '#E3E1DB'; ctx.fill(); stroke(5 * S); } }
+  // tears spraying out sideways from the outer corners of the eyes, in a steady stream
+  for (const sd of [-1, 1]) for (let k = 0; k < 6; k++) {
+    const a = ((t * 1.9 + k / 6 + (sd > 0 ? 0.08 : 0) + ph * 0.1) % 1);
+    const x = sd * (R * 0.7 + a * 330 * S), y = -R * 0.28 - 90 * S * a + 360 * S * a * a;
+    ctx.save(); ctx.globalAlpha = Math.min(1, (1 - a) * 2.2); tearDrop(x, y, sd > 0 ? Math.atan2(-90 + 720 * a, 330) : Math.PI - Math.atan2(-90 + 720 * a, 330), S * (1.05 - a * 0.4)); ctx.restore();
+  }
+  ctx.restore();
+  // shake lines by the shoulders
+  for (const sd of [-1, 1]) if (Math.sin(TAU * 4.4 * t + ph + 1 + sd) > 0) { const c = P([sd * 175, top + 160]); ctx.beginPath(); ctx.arc(c[0], c[1], 26 * S, sd > 0 ? -0.8 : Math.PI - 0.8, sd > 0 ? 0.8 : Math.PI + 0.8); stroke(4.5 * S); }
+}
+
+window.renderAt = (t) => {
+  const g = ctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, '#C9C5BC'); g.addColorStop(0.25, '#E7E3DA'); g.addColorStop(1, '#ECE8E0'); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  const vg = ctx.createRadialGradient(W / 2, H * 0.55, 500, W / 2, H * 0.55, 1300); vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(60,50,40,0.18)'); ctx.fillStyle = vg; ctx.fillRect(0, 0, W, H);
+  const GY = 1720;
+  guy({ x: 330, groundY: 1790, legLen: 470, stance: 120, footShift: -10, frontLeg: 1, s: 1.12, lean: -0.27, headTilt: -0.1, phase: 0, shirt: '#F4C430', number: '10', cap: true,
+    arms: [{ from: [-130, -230], elbow: [-190, -110], hand: [-70, -95], fistRot: 0.3, lines: true }, { from: [130, -230], elbow: [200, -120], hand: [150, -95], fistRot: -0.2, lines: true }] }, t);
+  guy({ x: 790, groundY: 1790, legLen: 470, stance: 105, frontLeg: -1, s: 1.12, lean: 0.12, headTilt: 0.08, phase: 1.7, shirt: '#F28C1E', bald: true, glasses: true, mustache: true,
+    arms: [{ from: [-130, -230], elbow: [-175, -110], hand: [40, -125], fistRot: -0.2, lines: true }, { from: [130, -230], elbow: [175, -70], hand: [-30, -70], fistRot: 0.2, lines: true }] }, t);
+  return cv.toDataURL('image/png');
+};
+window.DONE = true;
+</script></body></html>
