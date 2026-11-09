@@ -10,7 +10,7 @@
 
 | اليوم | الفيديو | الملف | الدرس |
 |---|---|---|---|
-| 1 | Yasin and the Window | `episodes/ep01-yasin-and-the-window-stick.mp4` (هتتحدّث بالاسم الجديد) | الصراحة |
+| 1 | Yasin and the Window | `episodes/ep01-yasin-and-the-window-stick.mp4` | الصراحة |
 | 2 | Yasin and the Sandwich | `tota-shorts/episodes/ep02/ep02.mp4` | المشاركة |
 | 3 | Laila and the Shadow | `tota-shorts/episodes/ep03/ep03.mp4` | الشجاعة |
 | 4 | The Hungry Cat | `tota-shorts/episodes/ep04/ep04.mp4` | الرحمة بالحيوانات |
