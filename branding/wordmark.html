@@ -12,13 +12,15 @@ let seed = 5; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 21474836
 // draw a word letter by letter: each letter its own colour, a little bounce, layered outlines
 function bouncy(word, cx, cy, size, font, cols, o = {}) {
   c.font = `${o.weight || ''} ${size}px ${font}`.trim();
-  const ws = [...word].map((ch) => c.measureText(ch).width + (o.track || 0)), total = ws.reduce((a, b) => a + b, 0);
+  let ws = [...word].map((ch) => c.measureText(ch).width + (o.track || 0)), total = ws.reduce((a, b) => a + b, 0);
+  const maxW = o.maxW || 800; // keep every line inside the round profile crop
+  if (total > maxW) { size *= maxW / total; c.font = `${o.weight || ''} ${size}px ${font}`.trim(); ws = [...word].map((ch) => c.measureText(ch).width + (o.track || 0)); total = ws.reduce((a, b) => a + b, 0); }
   let x = cx - total / 2;
   [...word].forEach((ch, i) => {
     const lx = x + ws[i] / 2, ly = cy + (o.wave ? Math.sin(i * 1.3) * o.wave : 0), r = o.tilt ? (i % 2 ? 1 : -1) * o.tilt : 0;
     c.save(); c.translate(lx, ly); c.rotate(r); c.textAlign = 'center'; c.textBaseline = 'middle'; c.lineJoin = 'round';
     if (o.shadow) { c.fillStyle = o.shadow; c.fillText(ch, 10, 14); c.lineWidth = size * (o.outer || 0.34); c.strokeStyle = o.shadow; c.strokeText(ch, 10, 14); }
-    if (o.outer) { c.lineWidth = size * o.outer; c.strokeStyle = o.outerCol || '#FFFFFF'; c.strokeText(ch, 0, 0); }
+    if (o.outer) { if (o.soft) { c.save(); c.shadowColor = o.soft; c.shadowBlur = 18; c.shadowOffsetX = 8; c.shadowOffsetY = 12; } c.lineWidth = size * o.outer; c.strokeStyle = o.outerCol || '#FFFFFF'; c.strokeText(ch, 0, 0); if (o.soft) c.restore(); }
     c.lineWidth = size * (o.inner || 0.14); c.strokeStyle = o.ink || INK; c.strokeText(ch, 0, 0);
     const col = cols[i % cols.length];
     if (Array.isArray(col)) { const g = c.createLinearGradient(0, -size / 2, 0, size / 2); g.addColorStop(0, col[0]); g.addColorStop(1, col[1]); c.fillStyle = g; } else c.fillStyle = col;
@@ -34,8 +36,8 @@ function A() {
   const g = c.createRadialGradient(C, C - 100, 100, C, C, 760); g.addColorStop(0, '#8FDBFF'); g.addColorStop(1, '#3FA9F5'); c.fillStyle = g; c.fillRect(0, 0, W, W);
   c.save(); c.globalAlpha = 0.18; c.fillStyle = '#fff'; for (let i = 0; i < 16; i++) { c.beginPath(); c.moveTo(C, C); c.arc(C, C, 900, (i / 16) * TAU, ((i + 0.5) / 16) * TAU); c.fill(); } c.restore();
   for (const [x, y] of [[170, 260], [900, 230], [190, 820], [880, 850], [540, 140]]) sparkle(x, y, 26, '#FFFFFF');
-  bouncy(NAME[0].toUpperCase(), C, 430, 300, 'Fredoka', ['#FF4D5E', '#FFC93C', '#4CD964', '#B072FF'], { weight: 700, outer: 0.34, inner: 0.13, shadow: 'rgba(20,40,90,0.35)', tilt: 0.06, wave: 14, shine: true });
-  bouncy(NAME.slice(1).join(' ').toUpperCase(), C, 700, 230, 'Fredoka', ['#FF8A00', '#FF4D9A', '#00B4D8', '#FFC93C', '#4CD964'], { weight: 700, outer: 0.34, inner: 0.13, shadow: 'rgba(20,40,90,0.35)', tilt: 0.05, wave: 10, shine: true });
+  bouncy(NAME[0].toUpperCase(), C, 430, 300, 'Baloo', ['#FF4D5E', '#FFC93C', '#4CD964', '#B072FF'], { weight: 700, outer: 0.26, inner: 0.07, soft: 'rgba(20,40,90,0.45)', tilt: 0.06, wave: 14, shine: true, maxW: 820 });
+  bouncy(NAME.slice(1).join(' ').toUpperCase(), C, 700, 230, 'Baloo', ['#FF8A00', '#FF4D9A', '#00B4D8', '#FFC93C', '#4CD964'], { weight: 700, outer: 0.26, inner: 0.07, soft: 'rgba(20,40,90,0.45)', tilt: 0.05, wave: 10, shine: true, maxW: 760 });
 }
 // B · Candy pop: glossy pink-orange letters with a deep purple outline on a cream base with sprinkles
 function B() {
@@ -43,7 +45,7 @@ function B() {
   const sp = ['#FF5C8A', '#3FA9F5', '#FFC93C', '#4CD964', '#B072FF'];
   for (let i = 0; i < 70; i++) { const a = rnd() * TAU, d = 300 + rnd() * 260; const x = C + Math.cos(a) * d, y = C + Math.sin(a) * d * 0.95; c.save(); c.translate(x, y); c.rotate(rnd() * TAU); c.fillStyle = sp[i % sp.length]; c.beginPath(); c.roundRect(-16, -5, 32, 10, 5); c.fill(); c.restore(); }
   c.beginPath(); c.ellipse(C, C + 10, 470, 330, -0.05, 0, TAU); c.fillStyle = '#FFFFFF'; c.fill(); c.lineWidth = 10; c.strokeStyle = INK; c.stroke();
-  bouncy(NAME[0], C, 420, 260, 'Lilita', [['#FF7A59', '#FF3D7F']], { outer: 0.0, inner: 0.16, ink: '#4B1E78', tilt: 0.04, shine: true, shadow: '#4B1E78' });
+  bouncy(NAME[0], C, 420, 260, 'Lilita', [['#FF7A59', '#FF3D7F']], { outer: 0.0, inner: 0.16, ink: '#4B1E78', tilt: 0.04, shine: true, shadow: '#4B1E78', maxW: 720 });
   bouncy(NAME.slice(1).join(' '), C, 650, 240, 'Lilita', [['#FFD54A', '#FF8A00']], { outer: 0.0, inner: 0.16, ink: '#4B1E78', tilt: 0.04, shine: true, shadow: '#4B1E78' });
   star(860, 300, 44, '#FFC93C', 0.2); star(220, 760, 34, '#4CD964', -0.3);
 }
@@ -53,10 +55,10 @@ function Cc() {
   const blob = () => { c.beginPath(); for (let i = 0; i <= 60; i++) { const a = (i / 60) * TAU, r = 400 + Math.sin(a * 5) * 18 + Math.cos(a * 3) * 14; i ? c.lineTo(C + Math.cos(a) * r * 1.08, C + Math.sin(a) * r) : c.moveTo(C + Math.cos(a) * r * 1.08, C + Math.sin(a) * r); } c.closePath(); };
   c.save(); c.translate(14, 18); blob(); c.fillStyle = 'rgba(0,0,0,0.12)'; c.fill(); c.restore();
   blob(); c.lineWidth = 46; c.strokeStyle = '#FFFFFF'; c.stroke(); c.fillStyle = '#FFD23F'; c.fill(); blob(); c.lineWidth = 8; c.strokeStyle = INK; c.stroke();
-  bouncy(NAME[0], C, 440, 270, 'Chewy', ['#1F3B73'], { inner: 0.0, outer: 0.0, tilt: 0.05, wave: 12 });
+  bouncy(NAME[0], C, 440, 270, 'Chewy', ['#1F3B73'], { inner: 0.0, outer: 0.0, tilt: 0.05, wave: 12, maxW: 640 });
   bouncy(NAME.slice(1).join(' '), C, 660, 250, 'Chewy', ['#FF4D5E'], { inner: 0.0, outer: 0.0, tilt: 0.05, wave: 10 });
   c.save(); c.translate(C + 10, 790); c.beginPath(); c.moveTo(-230, 0); c.quadraticCurveTo(0, 40, 230, 0); c.lineWidth = 16; c.lineCap = 'round'; c.strokeStyle = '#1F3B73'; c.stroke(); c.restore();
   sparkle(840, 270, 40, '#FF4D5E'); sparkle(890, 350, 22, '#3FA9F5'); sparkle(230, 300, 26, '#3FA9F5');
 }
-document.fonts.load('700 100px Fredoka').then(() => Promise.all([document.fonts.load('100px Lilita'), document.fonts.load('100px Chewy')])).then(() => { ({ a: A, b: B, c: Cc })[S](); window.DONE = true; });
+document.fonts.load('700 100px Fredoka').then(() => document.fonts.load('700 100px Baloo')).then(() => Promise.all([document.fonts.load('100px Lilita'), document.fonts.load('100px Chewy')])).then(() => { ({ a: A, b: B, c: Cc })[S](); window.DONE = true; });
 </script></body></html>
