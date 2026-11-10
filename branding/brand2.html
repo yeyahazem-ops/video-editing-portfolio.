@@ -1,0 +1,41 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+@font-face{font-family:Bungee;src:url(Bungee-Regular.ttf)}
+@font-face{font-family:Inter;src:url(Inter-800.ttf);font-weight:800}
+@font-face{font-family:Lilita;src:url(lilita-one-latin-400-normal.woff2)}
+html,body{margin:0}canvas{display:block}</style></head><body><canvas id="c" width="1080" height="1080"></canvas>
+<script>
+// Bubbly Tales, grown up: three all-ages marks. No characters, two or three colours, bold and simple.
+const S = new URLSearchParams(location.search).get('s') || 'd';
+const c = document.getElementById('c').getContext('2d'), W = 1080, C = 540, TAU = Math.PI * 2;
+const INK = '#16161A';
+const text = (str, x, y, size, font, fill, o = {}) => { c.save(); c.font = `${o.weight || ''} ${size}px ${font}`.trim(); c.textAlign = 'center'; c.textBaseline = 'middle'; c.lineJoin = 'round'; if (o.tr) c.letterSpacing = o.tr + 'px'; if (o.stroke) { c.lineWidth = o.sw; c.strokeStyle = o.stroke; c.strokeText(str, x, y); } c.fillStyle = fill; c.fillText(str, x, y); c.restore(); };
+function bubble(x, y, r, fill, line = INK, lw = 0) { c.beginPath(); c.arc(x, y, r, 0, TAU); c.fillStyle = fill; c.fill(); if (lw) { c.lineWidth = lw; c.strokeStyle = line; c.stroke(); } c.beginPath(); c.ellipse(x - r * 0.35, y - r * 0.38, r * 0.22, r * 0.12, -0.7, 0, TAU); c.fillStyle = 'rgba(255,255,255,0.85)'; c.fill(); }
+// D · Comic speech bubble: the name inside a white speech bubble with a thick ink outline, on warm yellow
+function D() {
+  c.fillStyle = '#FFC83D'; c.fillRect(0, 0, W, W);
+  c.save(); c.globalAlpha = 0.12; c.fillStyle = INK; for (let y = 30; y < W; y += 46) for (let x = (y / 46) % 2 ? 23 : 0; x < W; x += 46) { c.beginPath(); c.arc(x, y, 7, 0, TAU); c.fill(); } c.restore();
+  const sb = () => { c.beginPath(); c.roundRect(150, 300, 780, 420, 120); c.moveTo(380, 712); c.lineTo(330, 860); c.lineTo(520, 712); };
+  c.save(); c.translate(16, 20); sb(); c.fillStyle = INK; c.fill(); c.restore();
+  sb(); c.fillStyle = '#FFFFFF'; c.fill(); c.lineWidth = 16; c.strokeStyle = INK; c.lineJoin = 'round'; c.stroke();
+  text('BUBBLY', C, 450, 170, 'Bungee', INK);
+  text('TALES', C, 600, 120, 'Bungee', '#FF4F3F');
+  bubble(820, 250, 40, '#FFFFFF', INK, 10); bubble(880, 185, 24, '#FFFFFF', INK, 8);
+}
+// E · Bold modern: lowercase heavy wordmark, one bubble as the dot, charcoal on coral
+function E() {
+  c.fillStyle = '#FF5A4E'; c.fillRect(0, 0, W, W);
+  text('bubbly', C, 470, 230, 'Lilita', '#FFFFFF', { stroke: INK, sw: 26 });
+  text('tales', C, 680, 230, 'Lilita', '#FFE14D', { stroke: INK, sw: 26 });
+  bubble(830, 300, 50, '#FFFFFF', INK, 12); bubble(890, 225, 28, '#FFFFFF', INK, 9); bubble(240, 790, 32, '#FFFFFF', INK, 9);
+}
+// F · Minimal night: big yellow bubble mark with the initials, the name in clean caps beneath, on charcoal
+function F() {
+  c.fillStyle = '#1C1C24'; c.fillRect(0, 0, W, W);
+  bubble(C, 430, 250, '#FFD23F'); c.beginPath(); c.arc(C, 430, 250, 0, TAU); c.lineWidth = 0;
+  bubble(C + 230, 230, 40, '#FFD23F'); bubble(C + 300, 150, 22, '#FFD23F');
+  text('BT', C, 450, 230, 'Bungee', '#1C1C24');
+  text('BUBBLY TALES', C, 820, 92, 'Inter', '#FFFFFF', { weight: 800, tr: 6 });
+  c.fillStyle = '#FF5A4E'; c.beginPath(); c.roundRect(C - 90, 890, 180, 14, 7); c.fill();
+}
+Promise.all([document.fonts.load('100px Bungee'), document.fonts.load('800 100px Inter'), document.fonts.load('100px Lilita')]).then(() => { ({ d: D, e: E, f: F })[S](); window.DONE = true; });
+</script></body></html>
