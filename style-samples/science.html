@@ -1,0 +1,93 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+@font-face{font-family:Bungee;src:url(Bungee-Regular.ttf)}
+@font-face{font-family:Inter;src:url(Inter-800.ttf);font-weight:800}
+html,body{margin:0;background:#000}canvas{display:block}</style>
+<script type="importmap">{"imports":{"three":"./three/build/three.module.js"}}</script></head><body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script type="module">
+// Four looks for an all-ages science/action short, all on one topic: how a volcano erupts.
+import * as THREE from 'three';
+const S = new URLSearchParams(location.search).get('s') || 'flat';
+const cv = document.getElementById('c'), c = cv.getContext('2d'), W = 1080, H = 1920, TAU = Math.PI * 2;
+let sd = 3; const rnd = () => ((sd = (sd * 16807) % 2147483647) / 2147483647);
+const label = (txt, x, y, size, col, font = '800 ' + size + 'px Inter', align = 'center') => { c.save(); c.font = font; c.textAlign = align; c.textBaseline = 'middle'; c.fillStyle = col; c.fillText(txt, x, y); c.restore(); };
+const volcanoPath = (cx, base, w, h, top) => { c.beginPath(); c.moveTo(cx - w, base); c.quadraticCurveTo(cx - w * 0.35, base - h * 0.55, cx - top, base - h); c.lineTo(cx + top, base - h); c.quadraticCurveTo(cx + w * 0.35, base - h * 0.55, cx + w, base); c.closePath(); };
+
+// A · Flat vector explainer: a clean cut-away of the Earth with labelled layers, a soft-shadow flat look
+function flat() {
+  const sky = c.createLinearGradient(0, 0, 0, 1100); sky.addColorStop(0, '#1B2A55'); sky.addColorStop(1, '#FF8A5B'); c.fillStyle = sky; c.fillRect(0, 0, W, H);
+  for (let i = 0; i < 40; i++) { c.fillStyle = 'rgba(255,255,255,0.7)'; c.beginPath(); c.arc(rnd() * W, rnd() * 500, rnd() * 2.5 + 0.5, 0, TAU); c.fill(); }
+  // ash cloud
+  for (let i = 0; i < 14; i++) { const a = i / 14; c.fillStyle = `rgba(${90 + i * 4},${80 + i * 4},${90 + i * 3},0.95)`; c.beginPath(); c.arc(540 + Math.sin(i * 1.7) * 140 * a, 560 - a * 420, 70 + a * 120, 0, TAU); c.fill(); }
+  // lava bombs
+  for (let i = 0; i < 12; i++) { const a = rnd() * Math.PI - Math.PI, d = 200 + rnd() * 260; c.fillStyle = '#FFB627'; c.beginPath(); c.arc(540 + Math.cos(a) * d, 700 + Math.sin(a) * d * 0.8, 10 + rnd() * 14, 0, TAU); c.fill(); }
+  // ground layers (cut-away)
+  const layers = [['#6B4F3A', 1100], ['#57402F', 1300], ['#45322A', 1500], ['#33241F', 1700]];
+  layers.forEach(([col, y]) => { c.fillStyle = col; c.fillRect(0, y, W, H - y); });
+  volcanoPath(540, 1110, 520, 420, 60); c.fillStyle = '#7A5A42'; c.fill();
+  c.save(); volcanoPath(540, 1110, 520, 420, 60); c.clip(); c.fillStyle = 'rgba(0,0,0,0.18)'; c.fillRect(540, 0, 600, 1200); c.restore();
+  // magma chamber + conduit
+  c.fillStyle = '#FF5A1F'; c.beginPath(); c.ellipse(540, 1560, 260, 110, 0, 0, TAU); c.fill();
+  c.fillStyle = '#FFB627'; c.beginPath(); c.ellipse(540, 1545, 180, 60, 0, 0, TAU); c.fill();
+  c.fillStyle = '#FF5A1F'; c.beginPath(); c.moveTo(520, 1460); c.lineTo(560, 1460); c.lineTo(570, 690); c.lineTo(510, 690); c.closePath(); c.fill();
+  c.fillStyle = '#FF5A1F'; c.beginPath(); c.moveTo(480, 700); c.quadraticCurveTo(420, 860, 380, 980); c.lineTo(420, 990); c.quadraticCurveTo(470, 860, 530, 700); c.fill();
+  // callouts
+  const call = (x, y, tx, ty, t) => { c.strokeStyle = '#FFFFFF'; c.lineWidth = 4; c.beginPath(); c.moveTo(x, y); c.lineTo(tx, ty); c.stroke(); c.fillStyle = '#FFFFFF'; c.beginPath(); c.arc(x, y, 9, 0, TAU); c.fill(); c.fillStyle = 'rgba(15,20,40,0.85)'; c.beginPath(); c.roundRect(tx - (tx > 540 ? 0 : 300), ty - 34, 300, 68, 34); c.fill(); label(t, tx + (tx > 540 ? 150 : -150), ty, 30, '#FFFFFF'); };
+  call(600, 1560, 760, 1720, 'MAGMA CHAMBER'); call(560, 1100, 760, 1180, 'MAIN VENT'); call(420, 960, 260, 1000, 'LAVA FLOW'); call(560, 420, 760, 330, 'ASH CLOUD');
+  label('HOW A VOLCANO', 540, 140, 76, '#FFFFFF'); label('ERUPTS 🌋', 540, 230, 76, '#FFD23F');
+}
+// B · Comic action: halftone, speed lines, a dramatic low angle and a huge sound effect
+function comic() {
+  c.fillStyle = '#FFE14D'; c.fillRect(0, 0, W, H);
+  c.save(); c.translate(540, 760); for (let i = 0; i < 60; i++) { const a = (i / 60) * TAU; c.fillStyle = i % 2 ? '#FF7A1A' : '#FFB627'; c.beginPath(); c.moveTo(0, 0); c.lineTo(Math.cos(a) * 2400, Math.sin(a) * 2400); c.lineTo(Math.cos(a + TAU / 60) * 2400, Math.sin(a + TAU / 60) * 2400); c.fill(); } c.restore();
+  c.fillStyle = 'rgba(150,20,10,0.35)'; for (let y = 0; y < H; y += 22) for (let x = (y / 22) % 2 ? 11 : 0; x < W; x += 22) { const d = Math.hypot(x - 540, y - 760) / 1200; c.beginPath(); c.arc(x, y, 6 * Math.min(1, d), 0, TAU); c.fill(); }
+  volcanoPath(540, 1700, 700, 900, 90); c.fillStyle = '#3A2A3A'; c.fill(); c.lineWidth = 14; c.strokeStyle = '#111'; c.stroke();
+  c.save(); volcanoPath(540, 1700, 700, 900, 90); c.clip(); c.fillStyle = '#251A28'; c.fillRect(540, 0, 800, H); c.restore();
+  // lava fountain + bombs
+  c.fillStyle = '#FF3B1F'; c.beginPath(); c.moveTo(450, 800); c.quadraticCurveTo(380, 420, 540, 200); c.quadraticCurveTo(700, 420, 630, 800); c.fill(); c.lineWidth = 10; c.strokeStyle = '#111'; c.stroke();
+  c.fillStyle = '#FFD23F'; c.beginPath(); c.moveTo(490, 800); c.quadraticCurveTo(460, 500, 540, 330); c.quadraticCurveTo(620, 500, 590, 800); c.fill();
+  for (let i = 0; i < 10; i++) { const x = 140 + rnd() * 800, y = 250 + rnd() * 500, r = 20 + rnd() * 26; c.fillStyle = '#FF3B1F'; c.beginPath(); c.arc(x, y, r, 0, TAU); c.fill(); c.lineWidth = 8; c.strokeStyle = '#111'; c.stroke(); c.lineWidth = 6; c.beginPath(); c.moveTo(x, y + r); c.lineTo(x - (x - 540) * 0.15, y + r + 90); c.stroke(); }
+  c.save(); c.translate(540, 1180); c.rotate(-0.12); c.font = '400 170px Bungee'; c.textAlign = 'center'; c.lineJoin = 'round'; c.lineWidth = 32; c.strokeStyle = '#111'; c.strokeText('KA-BOOM!', 0, 0); c.fillStyle = '#FFFFFF'; c.fillText('KA-BOOM!', 0, 0); c.restore();
+  c.fillStyle = '#111'; c.fillRect(60, 1760, 960, 120); label('1,200°C OF MOLTEN ROCK!', 540, 1820, 50, '#FFE14D');
+  c.lineWidth = 18; c.strokeStyle = '#111'; c.strokeRect(9, 9, W - 18, H - 18);
+}
+// D · Blueprint: white technical line drawing with dimensions on a blue grid
+function blueprint() {
+  c.fillStyle = '#0F4C8A'; c.fillRect(0, 0, W, H);
+  c.strokeStyle = 'rgba(255,255,255,0.12)'; c.lineWidth = 1; for (let x = 0; x < W; x += 40) { c.beginPath(); c.moveTo(x, 0); c.lineTo(x, H); c.stroke(); } for (let y = 0; y < H; y += 40) { c.beginPath(); c.moveTo(0, y); c.lineTo(W, y); c.stroke(); }
+  c.strokeStyle = 'rgba(255,255,255,0.25)'; c.lineWidth = 2; for (let x = 0; x < W; x += 200) { c.beginPath(); c.moveTo(x, 0); c.lineTo(x, H); c.stroke(); } for (let y = 0; y < H; y += 200) { c.beginPath(); c.moveTo(0, y); c.lineTo(W, y); c.stroke(); }
+  c.strokeStyle = '#FFFFFF'; c.lineWidth = 5; volcanoPath(540, 1250, 460, 500, 60); c.stroke();
+  c.setLineDash([14, 10]); c.beginPath(); c.ellipse(540, 1520, 240, 100, 0, 0, TAU); c.stroke(); c.beginPath(); c.moveTo(525, 1420); c.lineTo(530, 750); c.moveTo(555, 1420); c.lineTo(550, 750); c.stroke(); c.setLineDash([]);
+  c.beginPath(); c.moveTo(0, 1250); c.lineTo(W, 1250); c.stroke();
+  for (let i = 0; i < 6; i++) { c.beginPath(); c.arc(540 + (i - 2.5) * 60, 620 - (i % 2) * 70, 30 + i * 6, 0, TAU); c.stroke(); }
+  const dim = (x1, y1, x2, y2, t, off) => { c.strokeStyle = '#FFD23F'; c.lineWidth = 3; c.beginPath(); c.moveTo(x1, y1); c.lineTo(x2, y2); c.stroke(); for (const [x, y] of [[x1, y1], [x2, y2]]) { c.beginPath(); c.moveTo(x - 12, y - 12); c.lineTo(x + 12, y + 12); c.stroke(); } label(t, (x1 + x2) / 2 + off[0], (y1 + y2) / 2 + off[1], 34, '#FFD23F'); };
+  dim(940, 750, 940, 1250, '3,000 m', [-80, 0]); dim(80, 1520, 80, 1250, '-5 km', [80, 0]); dim(80, 1330, 1000, 1330, '', [0, 0]); label('BASE 9 km', 540, 1365, 34, '#FFD23F');
+  label('FIG. 1 — STRATOVOLCANO', 540, 130, 54, '#FFFFFF'); label('CROSS-SECTION, NOT TO SCALE', 540, 200, 30, 'rgba(255,255,255,0.7)');
+  c.strokeStyle = '#FFFFFF'; c.lineWidth = 3; c.strokeRect(60, 1700, 960, 160); label('MAGMA CHAMBER  ·  CONDUIT  ·  VENT  ·  ASH', 540, 1780, 34, '#FFFFFF');
+}
+// C · Low-poly 3D: a faceted volcano island erupting, glowing lava, ash, ocean
+async function lowpoly() {
+  const gl = document.createElement('canvas'); gl.width = W; gl.height = H; const r = new THREE.WebGLRenderer({ canvas: gl, antialias: true, preserveDrawingBuffer: true }); r.setSize(W, H, false); r.outputColorSpace = THREE.SRGBColorSpace; r.toneMapping = THREE.ACESFilmicToneMapping; r.shadowMap.enabled = true;
+  const scene = new THREE.Scene(); scene.background = new THREE.Color('#2A1E3A'); scene.fog = new THREE.Fog('#5A3048', 30, 80);
+  scene.add(new THREE.HemisphereLight(0xffc0a0, 0x203050, 1.0));
+  const sun = new THREE.DirectionalLight(0xffd0b0, 1.6); sun.position.set(-10, 20, 10); sun.castShadow = true; scene.add(sun);
+  const glow = new THREE.PointLight(0xff5a1f, 120, 30, 1.6); glow.position.set(0, 9, 0); scene.add(glow);
+  const F = (col, em = 0) => new THREE.MeshStandardMaterial({ color: col, flatShading: true, roughness: 0.9, emissive: em ? col : 0x000000, emissiveIntensity: em });
+  const sea = new THREE.Mesh(new THREE.CircleGeometry(60, 40), F('#2B6CB0')); sea.rotation.x = -Math.PI / 2; scene.add(sea);
+  const geo = new THREE.ConeGeometry(9, 8, 10, 4, true); const pa = geo.attributes.position; for (let i = 0; i < pa.count; i++) { const y = pa.getY(i); if (y < 3.9) { pa.setX(i, pa.getX(i) * (1 + (rnd() - 0.5) * 0.15)); pa.setZ(i, pa.getZ(i) * (1 + (rnd() - 0.5) * 0.15)); } } geo.computeVertexNormals();
+  const v = new THREE.Mesh(geo, F('#5B4636')); v.position.y = 4; v.castShadow = true; scene.add(v);
+  const cap = new THREE.Mesh(new THREE.CylinderGeometry(1.6, 1.6, 0.4, 10), F('#FF5A1F', 2)); cap.position.y = 7.9; scene.add(cap);
+  for (let i = 0; i < 4; i++) { const a = -0.9 + i * 0.6, flow = new THREE.Mesh(new THREE.ConeGeometry(0.7, 8.2, 4), F('#FF7A1A', 1.8)); flow.position.set(Math.sin(a) * 4.6, 3.9, Math.cos(a) * 4.6); flow.rotation.set(Math.cos(a) * -0.85, 0, Math.sin(a) * 0.85); flow.rotateX(Math.PI); scene.add(flow); }
+  for (let i = 0; i < 26; i++) { const b = new THREE.Mesh(new THREE.IcosahedronGeometry(0.3 + rnd() * 0.5, 0), F(i % 3 ? '#FFB627' : '#FF5A1F', 2)); b.position.set((rnd() - 0.5) * 10, 9 + rnd() * 10, (rnd() - 0.5) * 6); scene.add(b); }
+  for (let i = 0; i < 22; i++) { const s = new THREE.Mesh(new THREE.IcosahedronGeometry(0.8 + rnd() * 1.4 + i * 0.05, 0), F('#8A7A8E')); s.position.set((rnd() - 0.5) * (3 + i * 0.5), 12 + i * 1.0, (rnd() - 0.5) * 4 - 3); scene.add(s); }
+  for (const [x, z, s] of [[-12, 4, 1], [11, 6, 0.8], [-9, -8, 0.9]]) { const p = new THREE.Mesh(new THREE.IcosahedronGeometry(1.2 * s, 0), F('#3F8F4F')); p.position.set(x, 1, z); scene.add(p); }
+  const cam = new THREE.PerspectiveCamera(42, W / H, 0.1, 200); cam.position.set(4, 9, 44); cam.lookAt(0, 13, 0);
+  r.render(scene, cam);
+  const out = document.createElement('canvas'); out.width = W; out.height = H; const o = out.getContext('2d'); o.drawImage(gl, 0, 0);
+  o.font = '800 76px Inter'; o.textAlign = 'center'; o.fillStyle = '#FFFFFF'; o.fillText('WHAT IF IT ERUPTS', 540, 180); o.fillStyle = '#FFD23F'; o.fillText('RIGHT NOW?', 540, 270);
+  document.body.innerHTML = ''; document.body.appendChild(out); window.OUT = out;
+}
+await Promise.all([document.fonts.load('100px Bungee'), document.fonts.load('800 100px Inter')]);
+if (S === 'lowpoly') await lowpoly(); else ({ flat, comic, blueprint })[S]();
+window.DONE = true;
+</script></body></html>
