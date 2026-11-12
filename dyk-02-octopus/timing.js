@@ -1,0 +1,4 @@
+(function () {
+  const TIMING = {"lines":{"hook":{"t":0.25,"end":3.315,"who":"narrator","voice":"JBFqnCBsd6RMkjVDRZzb","text":"This animal has three hearts... and blue blood!"},"gills":{"t":3.615,"end":8.538,"who":"narrator","voice":"JBFqnCBsd6RMkjVDRZzb","text":"Two hearts pump blood through its gills. The third pumps it to the rest of its body."},"blue":{"t":8.838,"end":13.9,"who":"narrator","voice":"JBFqnCBsd6RMkjVDRZzb","text":"Its blood uses copper instead of iron to carry oxygen. That makes it blue!"},"stop":{"t":14.2,"end":17.59,"who":"narrator","voice":"JBFqnCBsd6RMkjVDRZzb","text":"And when it swims, its main heart actually stops beating!"},"follow":{"t":17.99,"end":19.197,"who":"narrator","voice":"JBFqnCBsd6RMkjVDRZzb","text":"Follow for more!"}},"duration":21.597};
+  if (typeof module !== 'undefined') module.exports = TIMING; else globalThis.TIMING = TIMING;
+})();

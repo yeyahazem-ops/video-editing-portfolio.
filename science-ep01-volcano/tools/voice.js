@@ -32,6 +32,6 @@ for (const l of SCRIPT.lines) {
   lines[l.id] = { t: +t.toFixed(3), end: +(t + dur).toFixed(3), who: l.who || 'narrator', voice, text: l.text };
   t += dur;
 }
-const TIMING = { lines, duration: +(t + 3.6).toFixed(3) };
+const TIMING = { lines, duration: +(t + +(process.env.TAIL || 3.6)).toFixed(3) };
 fs.writeFileSync(path.join(__dirname, '..', 'timing.js'), `(function () {\n  const TIMING = ${JSON.stringify(TIMING)};\n  if (typeof module !== 'undefined') module.exports = TIMING; else globalThis.TIMING = TIMING;\n})();\n`);
 console.log(EP, 'duration', TIMING.duration.toFixed(1), Object.entries(lines).map(([id, l]) => `${id}@${l.t.toFixed(1)}`).join(' '));

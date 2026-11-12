@@ -1,0 +1,4 @@
+(function () {
+  const TIMING = {"lines":{"hook":{"t":0.25,"end":4.569,"who":"narrator","voice":"JBFqnCBsd6RMkjVDRZzb","text":"This honey is over three thousand years old... and you could still eat it."},"tomb":{"t":4.869,"end":10.024,"who":"narrator","voice":"JBFqnCBsd6RMkjVDRZzb","text":"Archaeologists found jars of honey in ancient Egyptian tombs, and it was still good!"},"why":{"t":10.324,"end":15.107,"who":"narrator","voice":"JBFqnCBsd6RMkjVDRZzb","text":"Honey has almost no water, and it's acidic, so germs can't survive in it."},"end":{"t":15.357,"end":17.354,"who":"narrator","voice":"JBFqnCBsd6RMkjVDRZzb","text":"Honey basically never spoils!"},"follow":{"t":17.754,"end":18.869,"who":"narrator","voice":"JBFqnCBsd6RMkjVDRZzb","text":"Follow for more!"}},"duration":21.269};
+  if (typeof module !== 'undefined') module.exports = TIMING; else globalThis.TIMING = TIMING;
+})();
