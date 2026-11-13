@@ -9,7 +9,7 @@
     { id: 'leads', text: 'You play as two main characters: Jason Duval and Lucia Caminos.', gap: 0.35 },
     { id: 'lucia', text: 'Lucia is the first female lead in a mainline GTA game.', gap: 0.25 },
     { id: 'preorder', text: 'Pre-order before November twentieth to get the Vintage Vice City Pack.', gap: 0.35 },
-    { id: 'cta', text: 'Are you ready? Follow Bubbly Tales for more gaming news.', gap: 0.45 },
+    { id: 'cta', text: 'Are you ready? Follow for more!', gap: 0.45 },
   ] };
   if (typeof module !== 'undefined') module.exports = SCRIPT; else globalThis.SCRIPT = SCRIPT;
 })();

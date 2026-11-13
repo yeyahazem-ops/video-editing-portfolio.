@@ -108,7 +108,7 @@
       const box = mesh(new T3.BoxGeometry(3.2, 2.6, 3.2), std(0xff2e7a, { emissive: 0xff2e7a, emissiveIntensity: 0.5 }), [0, 1.3, 0]), lid = grp(mesh(new T3.BoxGeometry(3.5, 0.8, 3.5), std(0xff5a9a, { emissive: 0xff2e7a, emissiveIntensity: 0.5 })), mesh(new T3.BoxGeometry(0.7, 0.85, 3.55), basic(0x3de8ff)), mesh(new T3.BoxGeometry(3.55, 0.85, 0.7), basic(0x3de8ff))), rib1 = mesh(new T3.BoxGeometry(0.7, 2.62, 3.25), basic(0x3de8ff), [0, 1.3, 0]), rib2 = mesh(new T3.BoxGeometry(3.25, 2.62, 0.7), basic(0x3de8ff), [0, 1.3, 0]);
       const beam = mesh(new T3.ConeGeometry(2.2, 22, 24, 1, true), additive(0xffe9a0, 0.35), [0, 13, 0]); beam.rotation.x = Math.PI; const gift = grp(box, rib1, rib2, lid, beam); const spk = new T3.InstancedMesh(new T3.OctahedronGeometry(0.22, 0), basic(0xfff2a0, { fog: false }), 40); spk.frustumCulled = false; gift.add(spk);
       gift.position.set(PO.x, 0.4, PO.z); scene.add(gift);
-      upd.push((t) => { const k = pop(t, L.preorder.t + 0.1, 0.5, 2.2); gift.visible = k > 0.001; gift.scale.setScalar(Math.max(0.001, k)); gift.rotation.y = 0.3 * Math.sin(t * 1.4); const a = t - ev.open, o = a > 0; lid.position.set(0, 3.0 + (o ? 5 * (1 - Math.exp(-a * 3)) : 0.25 * Math.sin(t * 25) * clamp((t - ev.open + 1.2) / 1.2) * (t < ev.open ? 1 : 0)), 0); lid.rotation.set(o ? 1.4 * (1 - Math.exp(-a * 2.5)) : 0, 0, o ? 0.5 * (1 - Math.exp(-a * 2.5)) : 0); beam.visible = o; beam.material.opacity = o ? 0.35 * Math.exp(-Math.max(0, a - 1.6) * 1.1) : 0; spk.visible = o; for (let i = 0; i < 40; i++) { const ang = rnd(i) * TAU, sp = 2 + rnd(i + 3) * 6, y = 2.6 + sp * a - 3.2 * a * a, r = sp * Math.min(a, 1.4) * 0.5; M.compose(new T3.Vector3(Math.cos(ang) * r, Math.max(0.1, y), Math.sin(ang) * r), new T3.Quaternion().setFromEuler(new T3.Euler(a * 5 + i, a * 4, 0)), new T3.Vector3().setScalar(o ? Math.max(0.001, 1 - a / 2.8) : 0.001)); spk.setMatrixAt(i, M); } spk.instanceMatrix.needsUpdate = true; });
+      upd.push((t) => { const k = pop(t, L.preorder.t + 0.1, 0.5, 2.2) * (1 - sstep(ev.end - 0.1, ev.end + 0.3, t)); gift.visible = k > 0.001; gift.scale.setScalar(Math.max(0.001, k)); gift.rotation.y = 0.3 * Math.sin(t * 1.4); const a = t - ev.open, o = a > 0; lid.position.set(0, 3.0 + (o ? 5 * (1 - Math.exp(-a * 3)) : 0.25 * Math.sin(t * 25) * clamp((t - ev.open + 1.2) / 1.2) * (t < ev.open ? 1 : 0)), 0); lid.rotation.set(o ? 1.4 * (1 - Math.exp(-a * 2.5)) : 0, 0, o ? 0.5 * (1 - Math.exp(-a * 2.5)) : 0); beam.visible = o; beam.material.opacity = o ? 0.35 * Math.exp(-Math.max(0, a - 1.6) * 1.1) : 0; spk.visible = o; for (let i = 0; i < 40; i++) { const ang = rnd(i) * TAU, sp = 2 + rnd(i + 3) * 6, y = 2.6 + sp * a - 3.2 * a * a, r = sp * Math.min(a, 1.4) * 0.5; M.compose(new T3.Vector3(Math.cos(ang) * r, Math.max(0.1, y), Math.sin(ang) * r), new T3.Quaternion().setFromEuler(new T3.Euler(a * 5 + i, a * 4, 0)), new T3.Vector3().setScalar(o ? Math.max(0.001, 1 - a / 2.8) : 0.001)); spk.setMatrixAt(i, M); } spk.instanceMatrix.needsUpdate = true; });
     }
   }
 
@@ -116,7 +116,7 @@
     const zc = Zc(t), ok = orbitK(t), hook = 1 - sstep(3.6, 5.0, t), shake = ev.ticks.reduce((a, x) => a + (t >= x ? Math.exp(-(t - x) * 7) : 0), 0);
     const bDate = sstep(L.date.t - 0.2, L.date.t + 1.2, t) * (1 - sstep(L.pc.t + 0.4, L.pc.t + 1.6, t));
     const bAir = sstep(L.setting.t - 0.3, L.setting.t + 1.9, t) * (1 - sstep(L.leads.t - 1.1, L.leads.t - 0.1, t));
-    const px = 1.6 * Math.sin(t * 0.4) * (1 - ok), py = 3.0 + 1.0 * sstep(0, 5, t) + 3.0 * bDate + 56 * bAir + 0.3 * Math.sin(t * 0.9);
+    const px = 1.6 * Math.sin(t * 0.4) * (1 - ok), py = 3.0 + 1.0 * sstep(0, 5, t) + 4.0 * sstep(ev.end - 0.3, ev.end + 3, t) + 3.0 * bDate + 56 * bAir + 0.3 * Math.sin(t * 0.9);
     const path = new T3.Vector3(px + 12 * bAir, py - 0.6 * hook, zc), look = new T3.Vector3(px * 0.3 + 3 * bAir, lerp(py + 1.0, 1.0, bAir * 0.92) + 6 * hook - 1.5 * bDate, zc - 30 - 14 * bAir);
     const u = clamp((t - (L.leads.t - 0.5)) / (ev.end - (L.leads.t - 0.5))), ang = lerp(-0.35, 1.25, sstep(0, 1, u) * 0.85 + u * 0.15), rad = 21 - 6 * sstep(L.preorder.t - 0.2, L.preorder.t + 1.2, t);
     const orb = new T3.Vector3(PO.x + Math.sin(ang) * rad, 3.2 + 1.3 * sstep(L.preorder.t, L.preorder.t + 2, t), PO.z + Math.cos(ang) * rad), olook = new T3.Vector3(PO.x, 2.6 + 0.8 * sstep(L.preorder.t, ev.open, t), PO.z);
@@ -145,9 +145,11 @@
     [ev.lucia - 0.15, ev.star - 0.1, 'LUCIA CAMINOS', 'main character', '#FF6E9A'],
     [ev.star, L.lucia.end + 0.25, 'FIRST FEMALE LEAD', 'in a mainline GTA game', '#FFE45E'],
     [ev.open - 0.3, L.preorder.end + 0.35, 'VINTAGE VICE CITY PACK', 'pre-order before November 20', '#FFE45E'],
+    [L.cta.t, L.cta.t + 1.0, 'ARE YOU READY?', 'November 19', '#FFE45E'],
+    [L.cta.t + 1.0, S.DURATION + 1, 'FOLLOW FOR MORE', 'gaming news · science · true stories', '#FFFFFF'],
   ];
   function hud(c, t) {
-    const a = 1 - sstep(ev.end - 0.4, ev.end, t); if (a <= 0) return; c.save(); c.globalAlpha = a;
+    const a = 1; c.save();
     let g = c.createLinearGradient(0, 0, 0, 520); g.addColorStop(0, 'rgba(10,4,30,0.55)'); g.addColorStop(1, 'rgba(10,4,30,0)'); c.fillStyle = g; c.fillRect(0, 0, W, 520);
     g = c.createLinearGradient(0, 1180, 0, H); g.addColorStop(0, 'rgba(10,4,30,0)'); g.addColorStop(0.45, 'rgba(10,4,30,0.62)'); g.addColorStop(1, 'rgba(10,4,30,0.82)'); c.fillStyle = g; c.fillRect(0, 1180, W, H - 1180);
     // persistent badge
@@ -159,7 +161,6 @@
       text(c, '6', 540, 790, 640, '#FFE45E', { font: 'Bungee', weight: 400, lw: 60, shadow: '#FF2E7A', alpha: hk * a, scale: sc, rot: -0.04 });
       text(c, 'DAYS TO GO', 540, 1150, 130, '#FFFFFF', { font: 'Bungee', weight: 400, lw: 22, shadow: '#3A0F70', alpha: hk * a, scale: 1 + 0.08 * slam }); }
     CARDS.forEach(([t0, t1, title, sub, col]) => { if (t < t0 || t > t1) return; const out = 1 - sstep(t1 - 0.25, t1, t); text(c, title, 540, 1325, 100, col, { font: 'Bungee', weight: 400, lw: 18, scale: pop(t, t0, 0.35, 2.2) * out, maxW: 880, shadow: '#3A0F70', alpha: a }); text(c, sub, 540, 1430, 46, '#FFFFFF', { font: 'Inter', weight: 800, lw: 10, scale: pop(t, t0 + 0.2, 0.3, 1.6) * out, maxW: 880, alpha: a }); });
-    text(c, 'Unofficial explainer · not affiliated with Rockstar Games', 540, 1480, 28, 'rgba(255,255,255,0.75)', { font: 'Inter', weight: 700, lw: 6, alpha: a * sstep(1, 2, t) });
     if (t >= ev.open && t < ev.open + 0.22) { c.fillStyle = `rgba(255,255,255,${0.7 * (1 - (t - ev.open) / 0.22)})`; c.fillRect(0, 0, W, H); }
     c.restore();
   }
@@ -171,5 +172,5 @@
   }
   Studio.film({ post: { vignette: 0.14, grain: 0, paper: 0 }, fadeOut: 0.4,
     async init() { await Studio.loadFont('Baloo', 'assets/baloo-700.woff2', 700); LOGO = await Studio.loadImage('assets/logo.png'); try { await document.fonts.load('400 40px Bungee'); await document.fonts.load('800 40px Inter'); } catch (e) { /* ignore */ } build(); },
-    draw(ctx, t) { if (t < ev.end + 0.05) { render3d(t); ctx.drawImage(R.domElement, 0, 0, W, H); } hud(ctx, t); endCard(ctx, t); } });
+    draw(ctx, t) { render3d(t); ctx.drawImage(R.domElement, 0, 0, W, H); hud(ctx, t); } });
 })();

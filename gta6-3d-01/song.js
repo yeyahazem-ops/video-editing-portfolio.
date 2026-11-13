@@ -10,7 +10,7 @@ const sc = require('./score');
 const { T, BEAT, DURATION, m, chordAt, L, ev, clock } = sc;
 const N = Math.ceil((DURATION + 0.5) * SR), bus = () => new Bus(N);
 const drums = bus(), bass = bus(), pad = bus(), keys = bus(), fx = bus(), verb = bus();
-const bars = Math.floor(ev.end / (BEAT * 4));
+const bars = Math.floor((DURATION - 1.5) / (BEAT * 4));
 Genre.play('edm', { clock, from: 0, to: bars, chordAt, buses: { drums, bass, pad, keys }, gain: 0.85 });
 // countdown slams: sub + snare + crash on frame ~0
 ev.ticks.forEach((t, i) => { fx.addMono(I.subBoom(0.9, 70 - i * 6, 30), t, 0.7); drums.addMono(I.kick({ punch: 1.2, tail: 0.5 }), t, 0.7); drums.addMono(I.snare ? I.snare() : I.clap(), t, 0.45); });
@@ -23,7 +23,7 @@ fx.addMono(I.bell(1320, 0.6, 1.2), ev.star, 0.1); for (let i = 0; i < 4; i++) fx
 fx.addMono(I.noiseSweep(ev.open - L.preorder.t, 300, 7000, { q: 1.1, pink: true, shape: (x) => x * x }), L.preorder.t, 0.12);
 fx.addMono(I.subBoom(1.4, 70, 28), ev.open, 0.8); drums.addMono(I.kick({ punch: 1.5, tail: 0.4 }), ev.open, 0.9); fx.addMono(I.pop(900), ev.open, 0.7); fx.addMono(I.noiseSweep(0.12, 9000, 2500, { q: 0.8, shape: (x) => Math.exp(-x * 9) }), ev.open, 0.5); drums.addMono(I.crash(3), ev.open, 0.4); for (let i = 0; i < 10; i++) fx.addMono(I.bell(1046 * Math.pow(2, [0, 4, 7, 12, 16][i % 5] / 12), 0.3, 1.1), ev.open + 0.05 + i * 0.07, 0.05);
 // outro
-for (const n of [m('A4'), m('C5'), m('E5'), m('A5')]) keys.addMono(I.musicBox(n), ev.end + 0.1, 0.07); fx.addMono(I.pop(1600), ev.end + 0.1, 0.4);
+fx.addMono(I.pop(1300), L.cta.t + 1.0, 0.4); drums.addMono(I.crash(3), L.cta.t + 1.0, 0.3);
 const vo = Voice.speak(sc.vo, { engine: 'none', out: path.join(__dirname, 'out'), length: N / SR });
 MIX.duck([drums, bass, pad, keys, verb], vo.bus, { depth: 0.5 });
 const room = reverb(verb, { room: 0.6, damp: 0.3 });
