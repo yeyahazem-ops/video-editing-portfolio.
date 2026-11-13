@@ -21,7 +21,7 @@ fx.addMono(I.subBoom(1.6, 60, 28), 0.02, 0.8); drums.addMono(I.crash(3), 0.02, 0
 fx.addMono(I.bell(1320, 0.6, 1.2), ev.star, 0.1); for (let i = 0; i < 4; i++) fx.addMono(I.bell(880 * Math.pow(2, [0, 4, 7, 12][i] / 12), 0.4, 1.0), ev.star + i * 0.06, 0.06);
 // gift opens: riser, thud, sparkle shower
 fx.addMono(I.noiseSweep(ev.open - L.preorder.t, 300, 7000, { q: 1.1, pink: true, shape: (x) => x * x }), L.preorder.t, 0.12);
-fx.addMono(I.subBoom(1.4, 70, 28), ev.open, 0.8); drums.addMono(I.crash(3), ev.open, 0.4); for (let i = 0; i < 10; i++) fx.addMono(I.bell(1046 * Math.pow(2, [0, 4, 7, 12, 16][i % 5] / 12), 0.3, 1.1), ev.open + 0.05 + i * 0.07, 0.05);
+fx.addMono(I.subBoom(1.4, 70, 28), ev.open, 0.8); drums.addMono(I.kick({ punch: 1.5, tail: 0.4 }), ev.open, 0.9); fx.addMono(I.pop(900), ev.open, 0.7); fx.addMono(I.noiseSweep(0.12, 9000, 2500, { q: 0.8, shape: (x) => Math.exp(-x * 9) }), ev.open, 0.5); drums.addMono(I.crash(3), ev.open, 0.4); for (let i = 0; i < 10; i++) fx.addMono(I.bell(1046 * Math.pow(2, [0, 4, 7, 12, 16][i % 5] / 12), 0.3, 1.1), ev.open + 0.05 + i * 0.07, 0.05);
 // outro
 for (const n of [m('A4'), m('C5'), m('E5'), m('A5')]) keys.addMono(I.musicBox(n), ev.end + 0.1, 0.07); fx.addMono(I.pop(1600), ev.end + 0.1, 0.4);
 const vo = Voice.speak(sc.vo, { engine: 'none', out: path.join(__dirname, 'out'), length: N / SR });

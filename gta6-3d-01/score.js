@@ -13,7 +13,7 @@
     ticks: [0.35, 0.75, 1.15], // the 6 slams in
     consoles: L.date.t + 1.7, pcx: L.pc.t + 1.2, tag1: L.price.t + 1.7, tag2: L.price.t + 4.2,
     pin: L.setting.t + 2.6, jason: L.leads.t + 2.4, lucia: L.lucia.t + 0.1, star: L.lucia.t + 2.3,
-    open: L.preorder.t + 2.3, end,
+    open: L.preorder.t + 2.02, end,
   };
   const vo = SCRIPT.lines.map((l) => ({ id: l.id, at: L[l.id].t, who: 'narrator', voice: L[l.id].voice, text: l.text }));
   const markers = { open: { t: ev.open, sync: 'av' }, end };
