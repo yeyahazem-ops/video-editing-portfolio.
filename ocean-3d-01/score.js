@@ -22,7 +22,12 @@
   const prog = ['Dm', 'Bb', 'Gm', 'A'], bars = Math.ceil(DURATION / (BEAT * 6)) + 1;
   const { chords, chordAt } = makeChords(clock, { Dm: { notes: ['D4', 'F4', 'A4'], bass: 'D2' }, Bb: { notes: ['D4', 'F4', 'Bb4'], bass: 'Bb1' }, Gm: { notes: ['D4', 'G4', 'Bb4'], bass: 'G1' }, A: { notes: ['C#4', 'E4', 'A4'], bass: 'A1' } },
     Array.from({ length: bars }, (_, b) => [0, b * 6, 6, prog[b % 4]]));
+  // narration: each line lands about a second before its landmark; long lines start earlier so none overlap
+  const TIMING = node ? require('./timing') : globalThis.TIMING, TL = TIMING.lines, dur = (id) => TL[id].end - TL[id].t;
+  const want = { hook: 0.15, ...Object.fromEntries(ST.map((s, i) => [s.id, s.t - (i ? 1.0 : 0.4)])), land: ev.land + 0.25, twist: ev.twist + 0.15 };
+  const ids = Object.keys(TL), at = {}; for (let i = ids.length - 1; i >= 0; i--) { const id = ids[i], nx = ids[i + 1]; at[id] = Math.min(want[id], nx ? at[nx] - 0.08 - dur(id) : Infinity); }
+  const vo = ids.map((id) => ({ id, at: +at[id].toFixed(3), who: 'narrator', voice: TL[id].voice, text: TL[id].text }));
   const markers = { land: { t: ev.land, sync: 'av' }, twist: ev.twist, end: ev.end };
-  const SCORE = { FPS, FORMAT, W, H, SAFE, DURATION, clock, T, BEAT, m, chords, chordAt, ST, ev, BOTTOM, vo: [], markers };
+  const SCORE = { FPS, FORMAT, W, H, SAFE, DURATION, clock, T, BEAT, m, chords, chordAt, ST, ev, BOTTOM, vo, markers };
   if (node) module.exports = SCORE; else globalThis.SCORE = SCORE;
 })();

@@ -35,8 +35,11 @@ drums.addMono(I.timpani(m('D2'), { decay: 2 }), ev.twist, 0.7); drums.addMono(I.
 [0.7, 1.2].forEach((d) => fx.addMono(I.thud(90, 0.12), ev.twist + d, 0.4)); fx.addMono(I.bell(1568, 0.9, 1.0), ev.twist + 2.2, 0.08);
 // end card
 fx.addMono(I.pop(1600), ev.end + 0.1, 0.4); for (const n of [m('D4'), m('F4'), m('A4'), m('D5')]) { keys.addMono(I.musicBox(n + 12), ev.end + 0.1, 0.07); st(brass, I.brassNote(n, 2.0, { bright: 0.8, seed: n }), ev.end + 0.1, 0.04); }
+const Voice = require('./engine/audio/voice');
+const vo = Voice.speak(sc.vo, { engine: 'none', out: path.join(__dirname, 'out'), length: N / SR });
+MIX.duck([drums, bass, pad, keys, brass, verb], vo.bus, { depth: 0.5 });
 const room = reverb(verb, { room: 0.92, damp: 0.25 });
-const mix = MIX.mixdown({ drums, bass, pad, keys, brass, fx, verb: room }, { drums: 1, bass: 1, pad: 2.4, keys: 1.3, brass: 2, fx: 1, verb: 1.1 }, {});
+const mix = MIX.mixdown({ drums, bass, pad, keys, brass, fx, voice: vo.bus, verb: room }, { drums: 1, bass: 1, pad: 2.4, keys: 1.3, brass: 2, fx: 0.8, voice: 2, verb: 1.1 }, {});
 MIX.highpass(mix, 26); MIX.fadeOut(mix, DURATION - 0.8, DURATION);
 const res = MIX.master(mix, 0.8, undefined, { lufs: -14 });
 MIX.writeWav(path.join(__dirname, 'out', 'music.wav'), mix);
